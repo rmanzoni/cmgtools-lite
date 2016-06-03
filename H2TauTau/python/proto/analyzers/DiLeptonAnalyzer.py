@@ -160,8 +160,13 @@ class DiLeptonAnalyzer(Analyzer):
                 self.counters.counter('DiLepton').inc(
                     'leg2 offline cuts passed')
 
+        if hasattr(self.cfg_ana, 'noTrigMatching') and self.cfg_ana.noTrigMatching:
+            match = False
+        else:
+            match = True
+        
         # Trigger matching; both legs
-        if len(self.cfg_comp.triggers) > 0:
+        if len(self.cfg_comp.triggers) > 0 and match:
             requireAllMatched = hasattr(self.cfg_ana, 'allTriggerObjMatched') \
                 and self.cfg_ana.allTriggerObjMatched
             selDiLeptons = [diL for diL in selDiLeptons if

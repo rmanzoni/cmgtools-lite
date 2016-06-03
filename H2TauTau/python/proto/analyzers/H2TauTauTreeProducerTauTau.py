@@ -28,6 +28,9 @@ class H2TauTauTreeProducerTauTau( H2TauTauTreeProducer ):
     self.var(self.tree, 'l2_trigger_weight_up'  )
     self.var(self.tree, 'l2_trigger_weight_down')
 
+    if hasattr(self.cfg_ana, 'addTnPInfo') and self.cfg_ana.addTnPInfo:
+        self.var(self.tree, 'tag')
+        self.var(self.tree, 'probe')
 
     
   def process(self, event):
@@ -66,5 +69,9 @@ class H2TauTauTreeProducerTauTau( H2TauTauTreeProducer ):
     self.fill(self.tree, 'l2_trigger_weight'     , tau2.weight_trigger     )
     self.fill(self.tree, 'l2_trigger_weight_up'  , tau2.weight_trigger_up  )
     self.fill(self.tree, 'l2_trigger_weight_down', tau2.weight_trigger_down)
+
+    if hasattr(self.cfg_ana, 'addTnPInfo') and self.cfg_ana.addTnPInfo:
+        self.fill(self.tree, 'tag'  , event.tag  )
+        self.fill(self.tree, 'probe', event.probe)
       
     self.fillTree(event)

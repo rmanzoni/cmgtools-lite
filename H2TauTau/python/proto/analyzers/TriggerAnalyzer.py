@@ -113,10 +113,16 @@ class TriggerAnalyzer(Analyzer):
         
         for trigger_name in self.triggerList + self.extraTrig:
             index = names.triggerIndex(trigger_name)
+#             if trigger_name == 'HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v2':
+#                 import pdb ; pdb.set_trace()
             if index == len(triggerBits):
                 continue
+#             import pdb ; pdb.set_trace()
             prescale = preScales.getPrescaleForIndex(index)
             fired = triggerBits.accept(index)
+            if trigger_name == 'HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v2':
+                print 'HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v2'
+                print fired
 
             trigger_infos.append(TriggerInfo(trigger_name, index, fired, prescale))
 
@@ -131,7 +137,6 @@ class TriggerAnalyzer(Analyzer):
             elif fired:
                 print 'WARNING: Trigger not passing because of prescale', trigger_name
                 self.counters.counter('Trigger').inc(trigger_name + 'prescaled')
-
 
         if self.cfg_ana.requireTrigger:
             if not trigger_passed:
