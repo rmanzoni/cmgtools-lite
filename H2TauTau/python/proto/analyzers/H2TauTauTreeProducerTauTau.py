@@ -1,6 +1,7 @@
 from CMGTools.H2TauTau.proto.analyzers.H2TauTauTreeProducer import H2TauTauTreeProducer
 from PhysicsTools.Heppy.physicsutils.TauDecayModes import tauDecayModes
 
+<<<<<<< HEAD
 
 class H2TauTauTreeProducerTauTau(H2TauTauTreeProducer):
 
@@ -40,6 +41,10 @@ class H2TauTauTreeProducerTauTau(H2TauTauTreeProducer):
         self.var(self.tree, 'GenSusyMChargino')
         self.var(self.tree, 'GenSusyMStau')
         self.var(self.tree, 'GenSusyMStau2')
+
+        if hasattr(self.cfg_ana, 'addTnPInfo') and self.cfg_ana.addTnPInfo:
+            self.var(self.tree, 'tag')
+            self.var(self.tree, 'probe')
 
     def process(self, event):
 
@@ -92,4 +97,9 @@ class H2TauTauTreeProducerTauTau(H2TauTauTreeProducer):
             self.fill(self.tree, 'GenSusyMStau',  event.genSusyMStau)
             self.fill(self.tree, 'GenSusyMStau2',  event.genSusyMStau2)
 
+        if hasattr(self.cfg_ana, 'addTnPInfo') and self.cfg_ana.addTnPInfo:
+            self.fill(self.tree, 'tag'  , event.tag  )
+            self.fill(self.tree, 'probe', event.probe)
+            self.fillTree(event)
+    
         self.fillTree(event)

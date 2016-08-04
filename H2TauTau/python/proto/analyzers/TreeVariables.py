@@ -93,6 +93,14 @@ particle_vars = [
     Variable('mass', lambda p: p.mass()),
 ]
 
+# stage-2 L1 object
+l1obj_vars = [
+    Variable('iso' , lambda p: p.hwIso()),
+    Variable('qual', lambda p: p.hwQual()),
+    Variable('type', lambda p: p.type),
+    Variable('bx'  , lambda p: p.bx),
+]
+
 # generic lepton
 lepton_vars = [
     Variable('reliso05', lambda lep : lep.relIsoR(R=0.3, dBetaFactor=0.5, allCharged=0)),
