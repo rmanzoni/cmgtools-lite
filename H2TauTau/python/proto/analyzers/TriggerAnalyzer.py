@@ -62,6 +62,18 @@ class TriggerAnalyzer(Analyzer):
                 'patTrigger',
                 'pat::PackedTriggerPrescales'
                 )
+
+#         RIC: how to get the instantaneous luminosity per event in miniAOD?
+#         self.handles['lumiscalers'] = AutoHandle(
+#             'scalersRawToDigi',
+#             'LumiScalersCollection',
+#         )
+# 
+#         if (lumiScaler->begin() != lumiScaler->end())
+#           event_.instLumi = lumiScaler->begin()->instantLumi();
+
+
+        
  
     def beginLoop(self, setup):
         super(TriggerAnalyzer,self).beginLoop(setup)
@@ -113,22 +125,13 @@ class TriggerAnalyzer(Analyzer):
         
         for trigger_name in self.triggerList + self.extraTrig:
             index = names.triggerIndex(trigger_name)
-#             if trigger_name == 'HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v2':
-#                 import pdb ; pdb.set_trace()
             if index == len(triggerBits):
                 continue
-#             import pdb ; pdb.set_trace()
             prescale = preScales.getPrescaleForIndex(index)
             fired = triggerBits.accept(index)
-            if trigger_name == 'HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v2':
-                print 'HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v2'
-                print fired
 
             trigger_infos.append(TriggerInfo(trigger_name, index, fired, prescale))
 
-            #print trigger_name, fired, prescale
-            #if fired:
-            #    import pdb ; pdb.set_trace()
             if fired and (prescale == 1 or self.cfg_ana.usePrescaled):
                 if trigger_name in self.triggerList:
                     trigger_passed = True
@@ -142,14 +145,11 @@ class TriggerAnalyzer(Analyzer):
             if not trigger_passed:
                 return False
         
-#         if event.eventId == 104644585: import pdb ; pdb.set_trace()
         if self.cfg_ana.addTriggerObjects:
             triggerObjects = self.handles['triggerObjects'].product()
-#             if event.eventId == 104644585: import pdb ; pdb.set_trace()
             for to in triggerObjects:
                 to.unpackPathNames(names)
                 for info in trigger_infos:
-#                     if event.eventId == 104644585: import pdb ; pdb.set_trace()
                     if to.hasPathName(info.name):
                         if to in info.objects:
                             continue
@@ -167,8 +167,6 @@ class TriggerAnalyzer(Analyzer):
         # RIC: remove duplicated trigger objects 
         #      (is this something that may happen in first place?)
         for info in trigger_infos:
-#             if event.eventId == 104644585: 
-#                 for oo in info.objects: print oo.pt(), oo.eta(), oo.phi()
             objs = info.objects     
             for to1, to2 in combinations(info.objects, 2):
                 to1Filter = set(sorted(list(to1.filterLabels())))
@@ -179,8 +177,6 @@ class TriggerAnalyzer(Analyzer):
                 if dR<0.01 and to2 in objs:
                     objs.remove(to2)
             info.objects = objs
-#             if event.eventId == 104644585: 
-#                 for oo in info.objects: print oo.pt(), oo.eta(), oo.phi()
                                                 
         event.trigger_infos = trigger_infos
 

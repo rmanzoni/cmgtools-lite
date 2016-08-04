@@ -1,10 +1,18 @@
+import ROOT
 from itertools import product
 
 from PhysicsTools.Heppy.analyzers.core.Analyzer import Analyzer
 from PhysicsTools.Heppy.analyzers.core.AutoHandle import AutoHandle
 from PhysicsTools.HeppyCore.utils.deltar import deltaR
 
+from PhysicsTools.Heppy.physicsobjects.L1Candidate import L1Candidate
+from PhysicsTools.Heppy.physicsobjects.Tau import Tau
+from PhysicsTools.Heppy.physicsobjects.Muon import Muon
+from PhysicsTools.Heppy.physicsobjects.Electron import Electron
+from PhysicsTools.Heppy.physicsobjects.Jet import Jet
+
 import PhysicsTools.HeppyCore.framework.config as cfg
+
 
 class Stage2L1ObjEnum:
     EGamma, EtSum, Jet, Tau, Muon = [0, 3, 5, 7, 9] # nor range(5) to keep some compatibility with stage-1 
@@ -14,6 +22,12 @@ class L1Stage2TriggerAnalyzer(Analyzer):
 
     def __init__(self, *args, **kwargs):
         super(L1Stage2TriggerAnalyzer, self).__init__(*args, **kwargs)
+        self.types = {
+            Tau      : ROOT.l1t.Tau   ,
+            Muon     : ROOT.l1t.Muon  ,
+            Electron : ROOT.l1t.EGamma,
+            Jet      : ROOT.l1t.Jet   ,
+        }
             
     def beginLoop(self, setup):
         super(L1Stage2TriggerAnalyzer, self).beginLoop(setup)
@@ -34,7 +48,7 @@ class L1Stage2TriggerAnalyzer(Analyzer):
             labelmuon = 'gmtStage2Digis'
 
         self.l1PtCut = self.cfg_ana.l1PtCut if hasattr(self.cfg_ana, 'l1PtCut') else 0.
-            
+                    
         self.handles[Stage2L1ObjEnum.EGamma] = AutoHandle( (labelcalo, 'EGamma'), 'BXVector<l1t::EGamma>')
         self.handles[Stage2L1ObjEnum.EtSum ] = AutoHandle( (labelcalo, 'EtSum' ), 'BXVector<l1t::EtSum>' )
         self.handles[Stage2L1ObjEnum.Jet   ] = AutoHandle( (labelcalo, 'Jet'   ), 'BXVector<l1t::Jet>'   )
@@ -54,28 +68,46 @@ class L1Stage2TriggerAnalyzer(Analyzer):
         dRmax = 0.5
         if hasattr(self.cfg_ana, 'dR'):
             dRmax = self.cfg_ana.dR
-            
-        legs = {event.diLepton.leg1():dRmax,
-                event.diLepton.leg2():dRmax}    
+        
+        legs = [event.diLepton.leg1(), event.diLepton.leg2()]    
+        
+        legs[0].L1matches = []
+        legs[1].L1matches = []
         
         mytaus = []
                     
         for coll in collections:
             mycoll = self.handles[coll].product()
+                        
+            allL1objects = []
             
-            n_l1obj = mycoll.size(bx)
-            
-            # for now only selects L1 objects from a BX
-            # can be generalised
-            for leg, l1 in product(legs.keys(), [mycoll.at(bx, i) for i in range(n_l1obj)]):
+            for ibx in [-2,-1,0,1,2]:            
+                for i in range(mycoll.size(ibx)):
+                    l1 = mycoll.at(ibx, i)
+                    l1.bx   = ibx                
+                    allL1objects.append(l1)
+                        
+            for leg, l1 in product(legs, allL1objects):
+                
                 if l1.pt() < self.l1PtCut:
                     continue
-                dR = deltaR(l1.eta(), l1.phi(), leg.eta(), leg.phi())
-                if dR < legs[leg]:
-                    leg.L1 = l1
-                    leg.L1flavour = coll
-                    legs[leg] = dR  
+                
+                dR = deltaR(l1, leg)
+                
+                myL1 = L1Candidate(l1)
 
+                myL1.type   = coll 
+                myL1.bx     = l1.bx
+                myL1.dR     = dR   
+                myL1.goodID = isinstance(l1, self.types[type(leg)])
+                                
+                if dR < dRmax:
+                    leg.L1matches.append(myL1)
+
+        for leg in legs:
+            leg.L1matches.sort(key = lambda l1 : (abs(l1.bx) == bx, l1.goodID, l1.pt(), l1.hwIso(), -l1.dR), reverse = True)
+
+        
         if hasattr(self.cfg_ana, 'requireMatches'):
             self.counters.counter('L1Stage2TriggerAnalyzer').inc('all events')
             if 'leg1' in self.cfg_ana.requireMatches:
@@ -94,11 +126,12 @@ class L1Stage2TriggerAnalyzer(Analyzer):
 setattr(L1Stage2TriggerAnalyzer, 'defaultConfig', 
     cfg.Analyzer(
         class_object=L1Stage2TriggerAnalyzer,
-#         collections=[Stage2L1ObjEnum.Muon, Stage2L1ObjEnum.Tau],
-        collections=[Stage2L1ObjEnum.Tau],
+        collections=[Stage2L1ObjEnum.Muon, Stage2L1ObjEnum.Tau],
+#         collections=[Stage2L1ObjEnum.Tau],
         requireMatches=[],
         bx=0,
         l1PtCut=0.,
+        l1PtForArbitration=28.,
         dR=0.5
     )
 )
