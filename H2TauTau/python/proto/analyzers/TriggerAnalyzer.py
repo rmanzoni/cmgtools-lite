@@ -72,6 +72,12 @@ class TriggerAnalyzer(Analyzer):
 #         if (lumiScaler->begin() != lumiScaler->end())
 #           event_.instLumi = lumiScaler->begin()->instantLumi();
 
+        if hasattr(self.cfg_ana, 'onlinerho'):
+            self.handles['onlinerho'] =  AutoHandle(
+                self.cfg_ana.onlinerho,
+                'double'
+                )
+
 
         
  
@@ -110,6 +116,11 @@ class TriggerAnalyzer(Analyzer):
         event.run = event.input.eventAuxiliary().id().run()
         event.lumi = event.input.eventAuxiliary().id().luminosityBlock()
         event.eventId = event.input.eventAuxiliary().id().event()
+
+        if 'onlinerho' in self.handles.keys():
+            event.onlinerho = self.handles['onlinerho'].product()[0]
+        else:
+            event.onlinerho = -99.
 
         triggerBits = self.handles['triggerResultsHLT'].product()
         names = event.input.object().triggerNames(triggerBits)

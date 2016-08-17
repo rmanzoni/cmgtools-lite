@@ -40,20 +40,29 @@ class L1Stage2TriggerAnalyzer(Analyzer):
     def declareHandles(self):
         super(L1Stage2TriggerAnalyzer, self).declareHandles()
         
-        if hasattr(self.cfg_ana, 'label'):
+        if hasattr(self.cfg_ana, 'labelcalo'):
             labelcalo = self.cfg_ana.labelcalo
-            labelmuon = self.cfg_ana.labelmuon
         else:
             labelcalo = 'caloStage2Digis'
+
+        if hasattr(self.cfg_ana, 'labelmuon'):
+            labelmuon = self.cfg_ana.labelmuon
+        else:
             labelmuon = 'gmtStage2Digis'
+
+        if hasattr(self.cfg_ana, 'process'):
+            process = self.cfg_ana.process
+        else:
+            'HLT'
+
 
         self.l1PtCut = self.cfg_ana.l1PtCut if hasattr(self.cfg_ana, 'l1PtCut') else 0.
                     
-        self.handles[Stage2L1ObjEnum.EGamma] = AutoHandle( (labelcalo, 'EGamma'), 'BXVector<l1t::EGamma>')
-        self.handles[Stage2L1ObjEnum.EtSum ] = AutoHandle( (labelcalo, 'EtSum' ), 'BXVector<l1t::EtSum>' )
-        self.handles[Stage2L1ObjEnum.Jet   ] = AutoHandle( (labelcalo, 'Jet'   ), 'BXVector<l1t::Jet>'   )
-        self.handles[Stage2L1ObjEnum.Muon  ] = AutoHandle( (labelmuon, 'Muon'  ), 'BXVector<l1t::Muon>'  )
-        self.handles[Stage2L1ObjEnum.Tau   ] = AutoHandle( (labelcalo, 'Tau'   ), 'BXVector<l1t::Tau>'   )
+        self.handles[Stage2L1ObjEnum.EGamma] = AutoHandle( (labelcalo, 'EGamma', process), 'BXVector<l1t::EGamma>')
+        self.handles[Stage2L1ObjEnum.EtSum ] = AutoHandle( (labelcalo, 'EtSum' , process), 'BXVector<l1t::EtSum>' )
+        self.handles[Stage2L1ObjEnum.Jet   ] = AutoHandle( (labelcalo, 'Jet'   , process), 'BXVector<l1t::Jet>'   )
+        self.handles[Stage2L1ObjEnum.Muon  ] = AutoHandle( (labelmuon, 'Muon'  , process), 'BXVector<l1t::Muon>'  )
+        self.handles[Stage2L1ObjEnum.Tau   ] = AutoHandle( (labelcalo, 'Tau'   , process), 'BXVector<l1t::Tau>'   )
         
     def process(self, event):
         self.readCollections(event.input)
@@ -80,8 +89,9 @@ class L1Stage2TriggerAnalyzer(Analyzer):
             mycoll = self.handles[coll].product()
                         
             allL1objects = []
-            
-            for ibx in [-2,-1,0,1,2]:            
+            #for ibx in [-2,-1,0,1,2]: # seg violation, fuck you L1
+            for ibx in [0]: # FIXME: temporary fix, understand what's going on
+                #import pdb ; pdb.set_trace()           
                 for i in range(mycoll.size(ibx)):
                     l1 = mycoll.at(ibx, i)
                     l1.bx   = ibx                
