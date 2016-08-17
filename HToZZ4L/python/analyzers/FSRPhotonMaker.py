@@ -17,29 +17,45 @@ import itertools
 class FSRPhotonMaker( Analyzer ):
     def __init__(self, cfg_ana, cfg_comp, looperName ):
         super(FSRPhotonMaker,self).__init__(cfg_ana,cfg_comp,looperName)
+        self.enable = getattr(cfg_ana, 'enable', True)
         self.leptonTag  = cfg_ana.leptons
         self.electronID = cfg_ana.electronID
         self.IsolationComputer = heppy.IsolationComputer(0.3)
 
     def declareHandles(self):
         super(FSRPhotonMaker, self).declareHandles()
-        self.handles['pf'] = AutoHandle( "packedPFCandidates",'std::vector<pat::PackedCandidate>')
+        if self.enable:
+            self.handles['pf'] = AutoHandle( "packedPFCandidates",'std::vector<pat::PackedCandidate>')
 
     def beginLoop(self, setup):
         super(FSRPhotonMaker,self).beginLoop(setup)
 
+    def dummyProcess(self, event):
+        leptons = getattr(event,self.leptonTag)
+        event.attachedFsrPhotons = []
+        event.selectedPhotons = []
+        for l in leptons:
+            l.ownFsrPhotons = [];
+            l.fsrPhotons = []
+            l.relIsoAfterFSR = l.absIsoWithFSR(R=0.3)/l.pt()
+
     def process(self, event):
+        if not self.enable:
+            self.dummyProcess(event)
+            return True
+
         self.readCollections( event.input )
         pf = self.handles['pf'].product()
         leptons = getattr(event,self.leptonTag)
         self.IsolationComputer.setPackedCandidates(self.handles['pf'].product())
 
         forIso = []
-        for p in pf:
+        for ipf,p in enumerate(pf):
             if p.pdgId() != 22 or not( p.pt() > 2.0 and abs(p.eta()) < 2.4 ):
                 continue
-            scVetoed = False
-            for l in leptons:
+            if self.cfg_ana.electronVeto != None:
+              scVetoed = False
+              for l in leptons:
                 if abs(l.pdgId())==11 and self.electronID(l):
                     #print "Testing photon pt %5.1f eta %+7.4f phi %+7.4f vs ele pt %.1f eta %+7.4f  phi %+7.4f sc  eta %+7.4f  phi %+7.4f" % ( p.pt(), p.eta(), p.phi(), l.pt(), l.eta(), l.phi(), l.superCluster().eta(), l.superCluster().phi() )
                     #print "Testing                                                       deta %+7.4f dphi %+7.4f sc deta %+7.4f dphi %+7.4f" % ( abs(p.eta()-l.eta()), deltaPhi(p.phi(),l.phi()), abs(p.eta()-l.superCluster().eta()), deltaPhi(p.phi(),l.superCluster().phi()))
@@ -49,9 +65,18 @@ class FSRPhotonMaker( Analyzer ):
                     elif self.cfg_ana.electronVeto == "electronEta":
                         if (abs(p.eta()-l.eta())<0.05 and abs(deltaPhi(p.phi(),l.phi()))<2) or deltaR(p.eta(),p.phi(),l.eta(),l.phi())<0.15: 
                             scVetoed = True; break
+                    elif self.cfg_ana.electronVeto == "pfCandReference":
+                        pfcrefs = l.associatedPackedPFCandidates()
+                        for iref in xrange(pfcrefs.size()):
+                            pfcref = pfcrefs[iref] 
+                            if pfcref.key() == ipf:
+                                #print "Testing photon pt %5.1f eta %+7.4f phi %+7.4f " % ( p.pt(), p.eta(), p.phi() )
+                                #print "  pfcand ref   pt %5.1f eta %+7.4f phi %+7.4f " % ( pfcref.get().pt(), pfcref.get().eta(), pfcref.get().phi() )
+                                #print "  from elec    pt %5.1f eta %+7.4f phi %+7.4f " % ( l.pt(), l.eta(), l.phi() )
+                                scVetoed = True;
                     else: 
                         raise RuntimeError, "electronVeto option %r not implemented" % self.cfg_ana.electronVeto
-            if scVetoed: continue
+              if scVetoed: continue
             closestLepton, minDR2 = bestMatch(p, leptons)
             if minDR2 >= 0.5*0.5: continue
             p.globalClosestLepton = closestLepton

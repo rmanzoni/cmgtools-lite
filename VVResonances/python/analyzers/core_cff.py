@@ -6,6 +6,8 @@ from CMGTools.VVResonances.analyzers.LeptonIDOverloader import *
 from CMGTools.VVResonances.analyzers.VVBuilder import *
 from CMGTools.VVResonances.analyzers.VTauBuilder import *
 from CMGTools.VVResonances.analyzers.Skimmer import *
+from CMGTools.VVResonances.analyzers.TopMergingAnalyzer import *
+
 import os
 
 
@@ -37,7 +39,9 @@ triggerAna = cfg.Analyzer(
 # Create flags for trigger bits
 triggerFlagsAna = cfg.Analyzer(
     TriggerBitAnalyzer, name="TriggerFlags",
-    processName = 'HLT',
+    
+    processName = 'HLT2',
+    fallbackProcessName = 'HLT',
     triggerBits = {
     }
     )
@@ -49,12 +53,13 @@ triggerFlagsAna = cfg.Analyzer(
 eventFlagsAna = cfg.Analyzer(
     TriggerBitAnalyzer, name="EventFlags",
     processName = 'PAT',
-    fallbackProcessName = 'RECO', 
+    fallbackProcessName = 'RECO',
     outprefix   = 'Flag',
     triggerBits = {
         "HBHENoiseFilter" : [ "Flag_HBHENoiseFilter" ],
         "HBHENoiseIsoFilter" : [ "Flag_HBHENoiseIsoFilter" ],
         "CSCTightHaloFilter" : [ "Flag_CSCTightHaloFilter" ],
+        "globalTightHalo2016Filter" : [ "Flag_globalTightHalo2016Filter" ],
         "hcalLaserEventFilter" : [ "Flag_hcalLaserEventFilter" ],
         "EcalDeadCellTriggerPrimitiveFilter" : [ "Flag_EcalDeadCellTriggerPrimitiveFilter" ],
         "goodVertices" : [ "Flag_goodVertices" ],
@@ -68,6 +73,20 @@ eventFlagsAna = cfg.Analyzer(
         "METFilters" : [ "Flag_METFilters" ],
     }
     )
+
+from CMGTools.TTHAnalysis.analyzers.badChargedHadronAnalyzer import badChargedHadronAnalyzer
+badChargedHadronAna = cfg.Analyzer(
+    badChargedHadronAnalyzer, name = 'badChargedHadronAna',
+    muons='slimmedMuons',
+    packedCandidates = 'packedPFCandidates',
+)
+
+from CMGTools.TTHAnalysis.analyzers.badMuonAnalyzer import badMuonAnalyzer
+badMuonAna = cfg.Analyzer(
+    badMuonAnalyzer, name = 'badMuonAna',
+    muons='slimmedMuons',
+    packedCandidates = 'packedPFCandidates',
+)
 
 
 # Select a list of good primary vertices (generic)
@@ -162,13 +181,13 @@ lepAna = cfg.Analyzer(
     el_effectiveAreas = "Spring15_25ns_v1" , #(can be 'Data2012' or 'Phys14_25ns_v1')
     ele_tightId = "" ,
     # Mini-isolation, with pT dependent cone: will fill in the miniRelIso, miniRelIsoCharged, miniRelIsoNeutral variables of the leptons (see https://indico.cern.ch/event/368826/ )
-    doMiniIsolation = False, # off by default since it requires access to all PFCandidates 
+    doMiniIsolation = False, # off by default since it requires access to all PFCandidates
     packedCandidates = 'packedPFCandidates',
     miniIsolationPUCorr = 'deltaBeta', # Allowed options: 'rhoArea' (EAs for 03 cone scaled by R^2), 'deltaBeta', 'raw' (uncorrected), 'weights' (delta beta weights; not validated)
     miniIsolationVetoLeptons = 'inclusive', # use 'inclusive' to veto inclusive leptons and their footprint in all isolation cones
     # minimum deltaR between a loose electron and a loose muon (on overlaps, discard the electron)
     min_dr_electron_muon = 0.0,
-    # do MC matching 
+    # do MC matching
     do_mc_match = True, # note: it will in any case try it only on MC, not on data
     match_inclusiveLeptons = False, # match to all inclusive leptons
     )
@@ -183,7 +202,7 @@ lepIDAna = cfg.Analyzer(
 metAna = cfg.Analyzer(
     METAnalyzer, name="metAnalyzer",
     metCollection     = "slimmedMETs",
-    noPUMetCollection = "slimmedMETs",    
+    noPUMetCollection = "slimmedMETs",
     copyMETsByValue = False,
     doTkMet = False,
     doMetNoPU = True,
@@ -204,7 +223,7 @@ metAna = cfg.Analyzer(
 
 jetAna = cfg.Analyzer(
     JetAnalyzer, name='jetAnalyzer',
-    jetCol = 'slimmedJets',
+    jetCol = 'slimmedJetsPuppi',
     copyJetsByValue = False,      #Whether or not to copy the input jets or to work with references (should be 'True' if JetAnalyzer is run more than once)
     genJetCol = 'slimmedGenJets',
     rho = ('fixedGridRhoFastjetAll','',''),
@@ -214,18 +233,18 @@ jetAna = cfg.Analyzer(
     jetLepDR = 0.4,
     cleanSelectedLeptons = False, #Whether to clean 'selectedLeptons' after disambiguation. Treat with care (= 'False') if running Jetanalyzer more than once
     minLepPt = 10,
-    relaxJetId = False,  
+    relaxJetId = False,
     doPuId = False, # Not commissioned in 7.0.X
     recalibrateJets = True, #'MC', # True, False, 'MC', 'Data'
-    applyL2L3Residual = True, # Switch to 'Data' when they will become available for Data
-    recalibrationType = "AK4PFchs",
-    mcGT     = "76X_mcRun2_asymptotic_v12",
-    dataGT   = "76X_dataRun2_v15_Run2015D_25ns",
+    applyL2L3Residual = 'Data', # Switch to 'Data' when they will become available for Data
+    recalibrationType = "AK4PFPuppi",
+    mcGT     = "Spring16_25nsV3_MC",
+    dataGT   = "Spring16_25nsV3_DATA",
     jecPath = "${CMSSW_BASE}/src/CMGTools/RootTools/data/jec/",
     shiftJEC = 0, # set to +1 or -1 to apply +/-1 sigma shift to the nominal jet energies
-    addJECShifts = False, # if true, add  "corr", "corrJECUp", and "corrJECDown" for each jet (requires uncertainties to be available!)
+    addJECShifts = True, # if true, add  "corr", "corrJECUp", and "corrJECDown" for each jet (requires uncertainties to be available!)
     smearJets = False,
-    shiftJER = 0, # set to +1 or -1 to get +/-1 sigma shifts  
+    shiftJER = 0, # set to +1 or -1 to get +/-1 sigma shifts
     alwaysCleanPhotons = False,
     cleanGenJetsFromPhoton = False,
     cleanJetsFromFirstPhoton = False,
@@ -252,18 +271,18 @@ jetAnaAK8 = cfg.Analyzer(
     jetLepDR = 0.4,
     cleanSelectedLeptons = False, #Whether to clean 'selectedLeptons' after disambiguation. Treat with care (= 'False') if running Jetanalyzer more than once
     minLepPt = 10,
-    relaxJetId = False,  
+    relaxJetId = False,
     doPuId = False, # Not commissioned in 7.0.X
     recalibrateJets = True, #'MC', # True, False, 'MC', 'Data'
-    applyL2L3Residual = True, # Switch to 'Data' when they will become available for Data
-    recalibrationType = "AK8PFchs",
-    mcGT     = "Fall15_25nsV2_MC",
-    dataGT   = "76X_dataRun2_v15_Run2015D_25ns",
+    applyL2L3Residual = 'Data', # Switch to 'Data' when they will become available for Data
+    recalibrationType = "AK8PFPuppi",
+    mcGT     = "Spring16_25nsV3_MC",
+    dataGT   = "Spring16_25nsV3_DATA",
     jecPath = "${CMSSW_BASE}/src/CMGTools/RootTools/data/jec/",
     shiftJEC = 0, # set to +1 or -1 to apply +/-1 sigma shift to the nominal jet energies
-    addJECShifts = False, # if true, add  "corr", "corrJECUp", and "corrJECDown" for each jet (requires uncertainties to be available!)
+    addJECShifts = True, # if true, add  "corr", "corrJECUp", and "corrJECDown" for each jet (requires uncertainties to be available!)
     smearJets = False,
-    shiftJER = 0, # set to +1 or -1 to get +/-1 sigma shifts  
+    shiftJER = 0, # set to +1 or -1 to get +/-1 sigma shifts
     alwaysCleanPhotons = False,
     cleanGenJetsFromPhoton = False,
     cleanJetsFromFirstPhoton = False,
@@ -280,11 +299,14 @@ jetAnaAK8 = cfg.Analyzer(
 
 
 
+mergedTruthAna = cfg.Analyzer(TopMergingAnalyzer,name='mergeTruthAna')
+
 
 
 vvAna = cfg.Analyzer(
     VVBuilder,name='vvAna',
     suffix = '',
+    doPUPPI=True,
     bDiscriminator = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
 #    boostedBdiscriminator = "pfBoostedDoubleSecondaryVertexAK8BJetTags",
     cDiscriminatorL = "pfCombinedCvsLJetTags",
@@ -296,15 +318,28 @@ vTauAna = cfg.Analyzer(
     VTauBuilder,name='vTauAna',
     suffix = ''
 )
-    
 
 
 
 
 
 
+def doPruning():
+    print "Switching to prunning" 
+    jetAna.jetCol = 'slimmedJets'
+#    jetAna.mcGT     = "76X_mcRun2_asymptotic_v12"
+#    jetAna.dataGT   = "76X_dataRun2_v15_Run2015D_25ns"
+    jetAna.recalibrationType = "AK4PFchs"
 
-    
+#    jetAnaAK8.mcGT     = "Fall15_25nsV2_MC"
+
+#    jetAnaAK8.mcGT     = "76X_mcRun2_asymptotic_v12"
+#    jetAnaAK8.dataGT   = "76X_dataRun2_v15_Run2015D_25ns"
+    jetAnaAK8.recalibrationType = "AK8PFchs"
+    vvAna.doPUPPI=False
+
+
+
 
 coreSequence = [
    #eventSelector,
@@ -323,5 +358,8 @@ coreSequence = [
 #    packedAna,
 #    multiStateAna,
     eventFlagsAna,
-    triggerFlagsAna    
+    triggerFlagsAna,
+    mergedTruthAna,
+    badMuonAna,
+    badChargedHadronAna,
 ]

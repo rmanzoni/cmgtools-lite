@@ -57,10 +57,15 @@ from PhysicsTools.HeppyCore.framework.heppy_loop import getHeppyOption
 #Load all common analyzers
 from CMGTools.VVResonances.analyzers.core_cff import * 
 
+#PUPPI by default #uncomment for prunning
+doPruning()
+
+
+
 #-------- SAMPLES AND TRIGGERS -----------
 from CMGTools.VVResonances.samples.loadSamples import *
 
-selectedComponents = mcSamples
+selectedComponents = mcSamples+dataSamples
 
 
 
@@ -85,19 +90,27 @@ triggerFlagsAna.triggerBits ={
     "HT800":triggers_HT800,
     "HT900":triggers_HT900,
     "JJ":triggers_dijet_fat,  
-    "MET90":triggers_met90_mht90+triggers_metNoMu90_mhtNoMu90,
     "MET120":triggers_metNoMu120_mhtNoMu120
 }
 
 
 #-------- HOW TO RUN
-test = 1
+test = 0
 if test==1:
     # test a single component, using a single thread.
-    selectedComponents = [BulkGravToWW_narrow_2500]
+    selectedComponents = [BulkGravToZZToZlepZhad_narrow_2000]
     for c in selectedComponents:
         c.files = c.files[:1]
         c.splitFactor = 1
 
+if test==2:
+    # test a single component, using a single thread.
+    selectedComponents = [TTJets]
+if test==3:
+    selectedComponents = [WJetsToLNu_HT2500toInf]
+    for c in selectedComponents:
+        c.files = c.files[:1]
+        c.splitFactor = 1
+    
 selectedComponents=autoAAA(selectedComponents)
 config=autoConfig(selectedComponents,sequence)
