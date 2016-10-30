@@ -20,10 +20,10 @@ from CMGTools.H2TauTau.proto.samples.spring16.triggers_muMu import data_triggers
 from CMGTools.RootTools.samples.autoAAAconfig import autoAAA
 
 # common configuration and sequence
-from CMGTools.H2TauTau.htt_ntuple_base_cff import commonSequence, jetAna, dyJetsFakeAna, puFileData, puFileMC, eventSelector
+from CMGTools.H2TauTau.htt_ntuple_base_cff import commonSequence, jetAna, httGenAna, puFileData, puFileMC, eventSelector
 
 # mu-mu specific configuration settings
-production = getHeppyOption('production', False)
+production = getHeppyOption('production', True)
 pick_events = getHeppyOption('pick_events', False)
 syncntuple = getHeppyOption('syncntuple', True)
 cmssw = getHeppyOption('cmssw', True)
@@ -31,16 +31,21 @@ computeSVfit = getHeppyOption('computeSVfit', False)
 data = getHeppyOption('data', False)
 reapplyJEC = getHeppyOption('reapplyJEC', True)
 
-dyJetsFakeAna.channel = 'mm'
+httGenAna.channel = 'mm'
 
-# Define mu-tau specific modules
+# Just to be sure
+if production:
+    syncntuple = False
+    pick_events = False
 
 if reapplyJEC:
     if cmssw:
         jetAna.jetCol = 'patJetsReapplyJEC'
-        dyJetsFakeAna.jetCol = 'patJetsReapplyJEC'
+        httGenAna.jetCol = 'patJetsReapplyJEC'
     else:
         jetAna.recalibrateJets = True
+
+# Define mu-mu specific modules
 
 MuMuAna = cfg.Analyzer(
     MuMuAnalyzer,
@@ -87,7 +92,8 @@ muonWeighter2 = cfg.Analyzer(
 
 treeProducer = cfg.Analyzer(
     H2TauTauTreeProducerMuMu,
-    name='H2TauTauTreeProducerMuMu'
+    name='H2TauTauTreeProducerMuMu',
+    addMoreJetInfo=True
 )
 
 syncTreeProducer = cfg.Analyzer(
@@ -139,7 +145,7 @@ selectedComponents = samples
 selectedComponents = data_list if data else samples
 
 sequence = commonSequence
-sequence.insert(sequence.index(dyJetsFakeAna), MuMuAna)
+sequence.insert(sequence.index(httGenAna), MuMuAna)
 sequence.append(muonWeighter1)
 sequence.append(muonWeighter2)
 if computeSVfit:
@@ -158,12 +164,13 @@ if not cmssw:
 
 if not production:
     # comp = [b for b in backgrounds_mu if b.name == 'DYJetsToLL_M50_LO'][0]
-    comp = data_list[0] if data else sync_list[0]
+    # comp = data_list[0] if data else sync_list[0]
+    comp = selectedComponents[0]
     selectedComponents = [comp]
     comp.splitFactor = 1
     # comp.files = comp.files[14:16]
 
-# autoAAA(selectedComponents)
+autoAAA(selectedComponents)
 
 preprocessor = None
 if cmssw:
