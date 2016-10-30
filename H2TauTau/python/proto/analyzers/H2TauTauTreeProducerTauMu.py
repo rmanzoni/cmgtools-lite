@@ -64,13 +64,13 @@ class H2TauTauTreeProducerTauMu(H2TauTauTreeProducer):
             self.var(self.tree, 'probe')
             self.bookParticle(self.tree, 'l1_trig_obj')
             self.bookParticle(self.tree, 'l2_trig_obj')
-            self.bookParticle(self.tree, 'l1_L1')
-            self.bookParticle(self.tree, 'l2_L1')
-            self.var(self.tree, 'l1_L1_type')
-            self.var(self.tree, 'l2_L1_type')
-            # RM add further branches related to the HLT filter matching by hand.
-            #    I cannot find a better solution for the moment 14/10/2015
-            self.bookParticle(self.tree, 'l2_hltL2Tau30eta2p2')
+            self.bookL1object(self.tree, 'l1_L1')
+            self.bookL1object(self.tree, 'l2_L1')
+
+        if hasattr(self.cfg_ana, 'addParticles'):
+            for particle in self.cfg_ana.addParticles:
+                self.bookParticle(self.tree, 'l2_%s' %particle)
+            
 
 
     def bookTrackInfo(self, name):
@@ -230,15 +230,28 @@ class H2TauTauTreeProducerTauMu(H2TauTauTreeProducer):
                 self.fillParticle(self.tree, 'l1_trig_obj', muon.to)
             if hasattr(tau, 'to'):            
                 self.fillParticle(self.tree, 'l2_trig_obj', tau.to)
-            if hasattr(muon, 'L1'):
-                self.fillParticle(self.tree, 'l1_L1', muon.L1)
-                self.fill(self.tree, 'l1_L1_type', muon.L1flavour)
-            if hasattr(tau, 'L1'):
-                self.fillParticle(self.tree, 'l2_L1', tau.L1)
-                self.fill(self.tree, 'l2_L1_type', tau.L1flavour)
-            # RM add further branches related to the HLT filter matching by hand.
-            #    I cannot find a better solution for the moment 14/10/2015
-            if hasattr(tau, 'hltL2Tau30eta2p2'):
-                self.fillParticle(self.tree, 'l2_hltL2Tau30eta2p2', tau.hltL2Tau30eta2p2)
+            if hasattr(muon, 'L1matches') and len(muon.L1matches):
+                self.fillL1object(self.tree, 'l1_L1', muon.L1matches[0])
+            if hasattr(tau, 'L1matches') and len(tau.L1matches):
+                isolated     = [l1 for l1 in tau.L1matches if 
+                                l1.pt() > 28. and \
+                                l1.hwIso() > 0 and \
+                                abs(l1.bx) == 0]
+                non_isolated = [l1 for l1 in tau.L1matches if 
+                                l1.pt() > 28. and \
+                                l1.hwIso() == 0 and \
+                                abs(l1.bx) == 0]
+                if len(isolated): 
+                    tauL1 = isolated[0]
+                elif len(non_isolated): 
+                    tauL1 = non_isolated[0]
+                else:
+                    tauL1 = tau.L1matches[0]
+                self.fillL1object(self.tree, 'l2_L1', tauL1)
+
+        if hasattr(self.cfg_ana, 'addParticles'):
+            for particle in self.cfg_ana.addParticles:
+                if hasattr(tau, particle):
+                    self.fillParticle(self.tree, 'l2_%s' %particle, getattr(tau, particle))
 
         self.fillTree(event)

@@ -170,6 +170,23 @@ class ComponentCreator(object):
         component.run_range = run_range
         return component
 
+    def makeMyPrivateDataComponent(self,name,dataset,user,pattern,dbsInstance,json=None,run_range=None,triggers=[],vetoTriggers=[],useAAA=False,jsonFilter=False):
+        component = cfg.DataComponent(
+            #dataset = dataset,
+            name = name,
+            files = self.getMyFiles(dataset,user,pattern,dbsInstance,run_range=run_range,useAAA=useAAA,json=(json if jsonFilter else None)),
+            intLumi = 1,
+            triggers = triggers,
+            json = (json if jsonFilter else None)
+            )
+        component.json = json
+        component.vetoTriggers = vetoTriggers
+        #component.dataset_entries = self.getPrimaryDatasetEntries(dataset,user,pattern,run_range=run_range)
+        component.dataset = dataset
+        component.run_range = run_range
+        component.dbsInstance = dbsInstance
+        return component
+
     def getFiles(self, dataset, user, pattern, useAAA=False, run_range=None, json=None):
         # print 'getting files for', dataset,user,pattern
         ds = createDataset( user, dataset, pattern, readcache=True, run_range=run_range, json=json )
@@ -183,9 +200,9 @@ class ComponentCreator(object):
         ds = createDataset( user, dataset, pattern, True, run_range=run_range )
         return ds.primaryDatasetEntries
 
-    def getMyFiles(self, dataset, user, pattern, dbsInstance, useAAA=False):
+    def getMyFiles(self, dataset, user, pattern, dbsInstance, useAAA=False, run_range=None, json=None):
         # print 'getting files for', dataset,user,pattern
-        ds = createMyDataset( user, dataset, pattern, dbsInstance, True )
+        ds = createMyDataset( user, dataset, pattern, dbsInstance, True, run_range=None, json=None )
         files = ds.listOfGoodFiles()
         mapping = 'root://eoscms.cern.ch//eos/cms%s'
         if useAAA: mapping = 'root://cms-xrd-global.cern.ch/%s'

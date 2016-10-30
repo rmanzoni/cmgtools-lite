@@ -162,8 +162,13 @@ class DiLeptonAnalyzer(Analyzer):
                 self.counters.counter('DiLepton').inc(
                     'leg2 offline cuts passed')
 
+        if hasattr(self.cfg_ana, 'noTrigMatching') and self.cfg_ana.noTrigMatching:
+            match = False
+        else:
+            match = True
+        
         # Trigger matching; both legs
-        if len(self.cfg_comp.triggers) > 0:
+        if len(self.cfg_comp.triggers) > 0 and match:
             requireAllMatched = hasattr(self.cfg_ana, 'allTriggerObjMatched') \
                 and self.cfg_ana.allTriggerObjMatched
 
@@ -322,19 +327,20 @@ class DiLeptonAnalyzer(Analyzer):
             legs = legs[:1]
 
         if hasattr(self.cfg_ana, 'filtersToMatch'):
-            filtersToMatch = self.cfg_ana.filtersToMatch[0]
-            leg = legs[self.cfg_ana.filtersToMatch[1] - 1]
-            triggerObjects = self.handles['triggerObjects'].product()
-
-            for item in product(triggerObjects, filtersToMatch):
-                to     = item[0]
-                filter = item[1]
-                print to.filterLabels()[-1], to.filterLabels()[-1] != filter
-                if to.filterLabels()[-1] != filter:
-                    continue
-#                 import pdb ; pdb.set_trace()
-                if self.trigObjMatched(to, [leg]):
-                    setattr(leg, filter, to)
+            for it in self.cfg_ana.filtersToMatch:
+                filtersToMatch = it[0]
+                leg = legs[it[1] - 1]
+                triggerObjects = self.handles['triggerObjects'].product()
+    
+                for item in product(triggerObjects, filtersToMatch):
+                    to     = item[0]
+                    filter = item[1]
+                    # print to.filterLabels()[-1], to.filterLabels()[-1] != filter
+                    if to.filterLabels()[-1] != filter:
+                        continue
+                    if self.trigObjMatched(to, [leg]):
+                        setattr(leg, filter, to)
+                        setattr(leg, 'to', to)
                     
         if not self.cfg_comp.triggerobjects:
             if self.cfg_ana.verbose:
