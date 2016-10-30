@@ -9,7 +9,8 @@ kreator = ComponentCreator()
 # json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-274240_13TeV_PromptReco_Collisions16_JSON.txt' # 0.8/fb
 # json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON.txt' # 2.1/fb
 # json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON.txt' # 12.9/fb
-json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-277148_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt' # 15.9/fb
+# json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-277148_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt' # 15.9/fb
+json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-283685_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt'
 
 # ----- 2016B Prompt-Reco v1 ----- #
 SingleElectron_Run2016B_PromptReco_v1 = kreator.makeDataComponent('SingleElectron_Run2016B_PromptReco_v1', '/SingleElectron/Run2016B-PromptReco-v1/MINIAOD', 'CMS', '.*root', json)
@@ -79,15 +80,24 @@ MuonEG_Run2016G_PromptReco_v1         = kreator.makeDataComponent('MuonEG_Run201
 DoubleMuon_Run2016G_PromptReco_v1     = kreator.makeDataComponent('DoubleMuon_Run2016G_PromptReco_v1'    , '/DoubleMuon/Run2016G-PromptReco-v1/MINIAOD'    , 'CMS', '.*root', json)
 HLTPhysics_Run2016G_PromptReco_v1     = kreator.makeDataComponent('HLTPhysics_Run2016G_PromptReco_v1'    , '/HLTPhysics/Run2016G-PromptReco-v1/MINIAOD'    , 'CMS', '.*root', json)
 
+# ----- 2016H Prompt-Reco v1 ----- #
+SingleElectron_Run2016H_PromptReco_v1 = kreator.makeDataComponent('SingleElectron_Run2016H_PromptReco_v1', '/SingleElectron/Run2016H-PromptReco-v1/MINIAOD', 'CMS', '.*root', json)
+DoubleEG_Run2016H_PromptReco_v1       = kreator.makeDataComponent('DoubleEG_Run2016H_PromptReco_v1'      , '/DoubleEG/Run2016H-PromptReco-v1/MINIAOD'      , 'CMS', '.*root', json)
+SingleMuon_Run2016H_PromptReco_v1     = kreator.makeDataComponent('SingleMuon_Run2016H_PromptReco_v1'    , '/SingleMuon/Run2016H-PromptReco-v1/MINIAOD'    , 'CMS', '.*root', json) #, useAAA=True)
+Tau_Run2016H_PromptReco_v1            = kreator.makeDataComponent('Tau_Run2016H_PromptReco_v1'           , '/Tau/Run2016H-PromptReco-v1/MINIAOD'           , 'CMS', '.*root', json)
+MuonEG_Run2016H_PromptReco_v1         = kreator.makeDataComponent('MuonEG_Run2016H_PromptReco_v1'        , '/MuonEG/Run2016H-PromptReco-v1/MINIAOD'        , 'CMS', '.*root', json)
+DoubleMuon_Run2016H_PromptReco_v1     = kreator.makeDataComponent('DoubleMuon_Run2016H_PromptReco_v1'    , '/DoubleMuon/Run2016H-PromptReco-v1/MINIAOD'    , 'CMS', '.*root', json)
+HLTPhysics_Run2016H_PromptReco_v1     = kreator.makeDataComponent('HLTPhysics_Run2016H_PromptReco_v1'    , '/HLTPhysics/Run2016H-PromptReco-v1/MINIAOD'    , 'CMS', '.*root', json)
 
 
-data_single_muon     = [SingleMuon_Run2016B_PromptReco_v1    , SingleMuon_Run2016B_PromptReco_v2    , SingleMuon_Run2016C_PromptReco_v2    , SingleMuon_Run2016D_PromptReco_v2    , SingleMuon_Run2016E_PromptReco_v2    , SingleElectron_Run2016F_PromptReco_v1, SingleElectron_Run2016G_PromptReco_v1]
-data_single_electron = [SingleElectron_Run2016B_PromptReco_v1, SingleElectron_Run2016B_PromptReco_v2, SingleElectron_Run2016C_PromptReco_v2, SingleElectron_Run2016D_PromptReco_v2, SingleElectron_Run2016E_PromptReco_v2, DoubleEG_Run2016F_PromptReco_v1      , DoubleEG_Run2016G_PromptReco_v1      ]
-data_muon_electron   = [                                       MuonEG_Run2016B_PromptReco_v2        , MuonEG_Run2016C_PromptReco_v2        , MuonEG_Run2016D_PromptReco_v2        , MuonEG_Run2016E_PromptReco_v2        , SingleMuon_Run2016F_PromptReco_v1    , SingleMuon_Run2016G_PromptReco_v1    ]
-data_tau             = [Tau_Run2016B_PromptReco_v1           , Tau_Run2016B_PromptReco_v2           , Tau_Run2016C_PromptReco_v2           , Tau_Run2016D_PromptReco_v2           , Tau_Run2016E_PromptReco_v2           , Tau_Run2016F_PromptReco_v1           , Tau_Run2016G_PromptReco_v1           ]
-data_double_muon     = [DoubleMuon_Run2016B_PromptReco_v1    , DoubleMuon_Run2016B_PromptReco_v2    , DoubleMuon_Run2016C_PromptReco_v2    , DoubleMuon_Run2016D_PromptReco_v2    , DoubleMuon_Run2016E_PromptReco_v2    , MuonEG_Run2016F_PromptReco_v1        , MuonEG_Run2016G_PromptReco_v1        ]
-data_double_eg       = [DoubleEG_Run2016B_PromptReco_v1      , DoubleEG_Run2016B_PromptReco_v2      , DoubleEG_Run2016C_PromptReco_v2      , DoubleEG_Run2016D_PromptReco_v2      , DoubleEG_Run2016E_PromptReco_v2      , DoubleMuon_Run2016F_PromptReco_v1    , DoubleMuon_Run2016G_PromptReco_v1    ]
-data_hltphysics      = [HLTPhysics_Run2016B_PromptReco_v1    , HLTPhysics_Run2016B_PromptReco_v2    , HLTPhysics_Run2016C_PromptReco_v2    , HLTPhysics_Run2016D_PromptReco_v2    , HLTPhysics_Run2016E_PromptReco_v2    , HLTPhysics_Run2016F_PromptReco_v1    , HLTPhysics_Run2016G_PromptReco_v1    ]
+
+data_single_muon     = [SingleMuon_Run2016B_PromptReco_v1    , SingleMuon_Run2016B_PromptReco_v2    , SingleMuon_Run2016C_PromptReco_v2    , SingleMuon_Run2016D_PromptReco_v2    , SingleMuon_Run2016E_PromptReco_v2    , SingleElectron_Run2016F_PromptReco_v1, SingleElectron_Run2016G_PromptReco_v1, SingleElectron_Run2016H_PromptReco_v1]
+data_single_electron = [SingleElectron_Run2016B_PromptReco_v1, SingleElectron_Run2016B_PromptReco_v2, SingleElectron_Run2016C_PromptReco_v2, SingleElectron_Run2016D_PromptReco_v2, SingleElectron_Run2016E_PromptReco_v2, DoubleEG_Run2016F_PromptReco_v1      , DoubleEG_Run2016G_PromptReco_v1      , DoubleEG_Run2016H_PromptReco_v1      ]
+data_muon_electron   = [                                       MuonEG_Run2016B_PromptReco_v2        , MuonEG_Run2016C_PromptReco_v2        , MuonEG_Run2016D_PromptReco_v2        , MuonEG_Run2016E_PromptReco_v2        , SingleMuon_Run2016F_PromptReco_v1    , SingleMuon_Run2016G_PromptReco_v1    , SingleMuon_Run2016H_PromptReco_v1    ]
+data_tau             = [Tau_Run2016B_PromptReco_v1           , Tau_Run2016B_PromptReco_v2           , Tau_Run2016C_PromptReco_v2           , Tau_Run2016D_PromptReco_v2           , Tau_Run2016E_PromptReco_v2           , Tau_Run2016F_PromptReco_v1           , Tau_Run2016G_PromptReco_v1           , Tau_Run2016H_PromptReco_v1           ]
+data_double_muon     = [DoubleMuon_Run2016B_PromptReco_v1    , DoubleMuon_Run2016B_PromptReco_v2    , DoubleMuon_Run2016C_PromptReco_v2    , DoubleMuon_Run2016D_PromptReco_v2    , DoubleMuon_Run2016E_PromptReco_v2    , MuonEG_Run2016F_PromptReco_v1        , MuonEG_Run2016G_PromptReco_v1        , MuonEG_Run2016H_PromptReco_v1        ]
+data_double_eg       = [DoubleEG_Run2016B_PromptReco_v1      , DoubleEG_Run2016B_PromptReco_v2      , DoubleEG_Run2016C_PromptReco_v2      , DoubleEG_Run2016D_PromptReco_v2      , DoubleEG_Run2016E_PromptReco_v2      , DoubleMuon_Run2016F_PromptReco_v1    , DoubleMuon_Run2016G_PromptReco_v1    , DoubleMuon_Run2016H_PromptReco_v1    ]
+data_hltphysics      = [HLTPhysics_Run2016B_PromptReco_v1    , HLTPhysics_Run2016B_PromptReco_v2    , HLTPhysics_Run2016C_PromptReco_v2    , HLTPhysics_Run2016D_PromptReco_v2    , HLTPhysics_Run2016E_PromptReco_v2    , HLTPhysics_Run2016F_PromptReco_v1    , HLTPhysics_Run2016G_PromptReco_v1    , HLTPhysics_Run2016H_PromptReco_v1    ]
 
 all_data = data_single_muon + data_single_electron + data_muon_electron + data_tau + data_double_muon + data_double_eg + data_hltphysics
 
