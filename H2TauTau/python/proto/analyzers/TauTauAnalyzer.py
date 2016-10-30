@@ -306,8 +306,9 @@ class TauTauAnalyzer(DiLeptonAnalyzer):
         # in that case the least isolated is the one with the lowest MVAscore
         # if osDiLeptons : return sorted(osDiLeptons, key=lambda dl : least_iso(dl), reverse=False)[0]
         # else           :
-        return sorted(diLeptons, key=lambda dl: least_iso_highest_pt(dl), reverse=False)[0]
-
+        bestDiL = sorted(diLeptons, key=lambda dl: least_iso_highest_pt(dl), reverse=False)[0]
+        return bestDiL
+        
     def scaleP4(self, tau, scale):
        
         modifiedP4 = ROOT.TLorentzVector()

@@ -72,14 +72,34 @@ class TriggerAnalyzer(Analyzer):
 #         if (lumiScaler->begin() != lumiScaler->end())
 #           event_.instLumi = lumiScaler->begin()->instantLumi();
 
-        if hasattr(self.cfg_ana, 'onlinerho'):
-            self.handles['onlinerho'] =  AutoHandle(
-                self.cfg_ana.onlinerho,
-                'double'
-                )
+        self.handles['hltFixedGridRhoFastjetAllCaloForMuons'] = AutoHandle(
+            'hltFixedGridRhoFastjetAllCaloForMuons',
+            'double',
+            mayFail=True,
+            disableAtFirstFail=False,
+        )
 
+        self.handles['hltFixedGridRhoFastjetAllCalo'] = AutoHandle(
+            'hltFixedGridRhoFastjetAllCalo',
+            'double',
+            mayFail=True,
+            disableAtFirstFail=False,
+        )
 
-        
+        self.handles['hltFixedGridRhoFastjetAll'] = AutoHandle(
+            'hltFixedGridRhoFastjetAll',
+            'double',
+            mayFail=True,
+            disableAtFirstFail=False,
+        )
+
+        self.handles['hltFixedGridRhoFastjetAllPFReg'] = AutoHandle(
+            'hltFixedGridRhoFastjetAllPFReg',
+            'double',
+            mayFail=True,
+            disableAtFirstFail=False,
+        )
+
  
     def beginLoop(self, setup):
         super(TriggerAnalyzer,self).beginLoop(setup)
@@ -131,10 +151,26 @@ class TriggerAnalyzer(Analyzer):
         event.lumi = event.input.eventAuxiliary().id().luminosityBlock()
         event.eventId = event.input.eventAuxiliary().id().event()
 
-        if 'onlinerho' in self.handles.keys():
-            event.onlinerho = self.handles['onlinerho'].product()[0]
-        else:
-            event.onlinerho = -99.
+        try:
+            event.hlt_calo_rho_eta2p5 = self.handles['hltFixedGridRhoFastjetAllCaloForMuons'].product()[0]
+        except:
+            event.hlt_calo_rho_eta2p5 = -99.
+            
+        try:
+            event.hlt_calo_rho = self.handles['hltFixedGridRhoFastjetAllCalo'].product()[0]
+        except:
+            event.hlt_calo_rho = -99.
+    
+        try:
+            event.hlt_pf_rho = self.handles['hltFixedGridRhoFastjetAll'].product()[0]
+        except:
+            event.hlt_pf_rho = -99.
+
+        try:
+            event.hlt_pf_rho_reg = self.handles['hltFixedGridRhoFastjetAllPFReg'].product()[0]
+        except:
+            event.hlt_pf_rho_reg = -99.
+
 
         triggerBits = self.handles['triggerResultsHLT'].product()
         names = event.input.object().triggerNames(triggerBits)

@@ -510,18 +510,22 @@ def createDataset( user, dataset, pattern, readcache=False,
     return data
 
 ### MM
-def createMyDataset( user, dataset, pattern, dbsInstance, readcache=False):
+def createMyDataset( user, dataset, pattern, dbsInstance, readcache=False, run_range=None, json=None ):
 
     cachedir =  '/'.join( [os.environ['HOME'],'.cmgdataset'])
 
-    def cacheFileName(data, user, dbsInstance, pattern):
+    def cacheFileName(data, user, dbsInstance, pattern, run_range, json):
+        rr = "_run%s_%s" % (run_range[0], run_range[1]) if run_range else ""
+        jj = ('%' + os.path.splitext(os.path.basename(json))[0]) if json is not None else ""
         cf =  data.replace('/','_')
-        name = '{dir}/{user}%{dbsInstance}%{name}%{pattern}.pck'.format(
+        name = '{dir}/{user}%{dbsInstance}%{name}{rr}%{pattern}{jj}.pck'.format(
             dir = cachedir,
             user = user,
             dbsInstance = dbsInstance,
             name = cf,
-            pattern = pattern)
+            rr = rr,
+            pattern = pattern,
+            jj = jj)
         return name
 
     def writeCache(dataset):
@@ -530,12 +534,14 @@ def createMyDataset( user, dataset, pattern, dbsInstance, readcache=False):
         cachename = cacheFileName(dataset.name,
                                   dataset.user,
                                   dataset.dbsInstance,
-                                  dataset.pattern)
+                                  dataset.pattern,
+                                  dataset.run_range, 
+                                  dataset.json)
         pckfile = open( cachename, 'w')
         pickle.dump(dataset, pckfile)
 
-    def readCache(data, user, dbsInstance, pattern):
-        cachename = cacheFileName(data, user, dbsInstance, pattern)
+    def readCache(data, user, dbsInstance, pattern, run_range, json):
+        cachename = cacheFileName(data, user, dbsInstance, pattern, run_range, json)
         
         pckfile = open( cachename)
         dataset = pickle.load(pckfile)
@@ -544,7 +550,7 @@ def createMyDataset( user, dataset, pattern, dbsInstance, readcache=False):
 
     if readcache:
         try:
-            data = readCache(dataset, user, dbsInstance, pattern)    
+            data = readCache(dataset, user, dbsInstance, pattern, run_range, json)    
         except IOError:
             readcache = False
     if not readcache:
