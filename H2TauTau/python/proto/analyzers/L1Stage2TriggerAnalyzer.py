@@ -53,7 +53,7 @@ class L1Stage2TriggerAnalyzer(Analyzer):
         if hasattr(self.cfg_ana, 'process'):
             process = self.cfg_ana.process
         else:
-            'HLT'
+            process = 'HLT'
 
 
         self.l1PtCut = self.cfg_ana.l1PtCut if hasattr(self.cfg_ana, 'l1PtCut') else 0.
