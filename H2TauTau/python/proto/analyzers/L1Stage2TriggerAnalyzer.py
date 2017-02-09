@@ -84,17 +84,19 @@ class L1Stage2TriggerAnalyzer(Analyzer):
         legs[1].L1matches = []
         
         mytaus = []
+        
                     
         for coll in collections:
             mycoll = self.handles[coll].product()
-                        
+                                        
             allL1objects = []
             #for ibx in [-2,-1,0,1,2]: # seg violation, fuck you L1
             for ibx in [0]: # FIXME: temporary fix, understand what's going on
                 #import pdb ; pdb.set_trace()           
                 for i in range(mycoll.size(ibx)):
                     l1 = mycoll.at(ibx, i)
-                    l1.bx   = ibx                
+                    l1.bx    = ibx                
+                    l1.index = i                
                     allL1objects.append(l1)
                         
             for leg, l1 in product(legs, allL1objects):

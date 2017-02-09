@@ -330,17 +330,30 @@ class DiLeptonAnalyzer(Analyzer):
             for it in self.cfg_ana.filtersToMatch:
                 filtersToMatch = it[0]
                 leg = legs[it[1] - 1]
+                leg.tos = []
                 triggerObjects = self.handles['triggerObjects'].product()
-    
                 for item in product(triggerObjects, filtersToMatch):
                     to     = item[0]
                     filter = item[1]
-                    # print to.filterLabels()[-1], to.filterLabels()[-1] != filter
-                    if to.filterLabels()[-1] != filter:
+                    
+                    if not to.hasFilterLabel(filter):
                         continue
+                    
+                    # RIC: this does not mean that the last filter is fired!
+                    #      you need to make sure the filter you're requiring
+                    #      *is* the last filter, regardless of its position
+                    #      in the collection
+                    # print to.filterLabels()[-1], to.filterLabels()[-1] != filter
+                    #if to.filterLabels()[-1] != filter:
+                    #    continue
+
                     if self.trigObjMatched(to, [leg]):
                         setattr(leg, filter, to)
-                        setattr(leg, 'to', to)
+                        leg.tos.append(to)
+                    
+                # RIC: assign as trigger object the one with the highest pt
+                if leg.tos:
+                    leg.to = sorted(leg.tos, key=lambda x: x.pt(), reverse=True)[0]
                     
         if not self.cfg_comp.triggerobjects:
             if self.cfg_ana.verbose:

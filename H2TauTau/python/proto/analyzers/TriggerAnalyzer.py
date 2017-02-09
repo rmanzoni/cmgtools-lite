@@ -126,7 +126,7 @@ class TriggerAnalyzer(Analyzer):
         self.counters.counter('Trigger').register('All events')
         self.counters.counter('Trigger').register('HLT')
 
-        for trigger in self.triggerList:
+        for trigger in self.triggerList + self.extraTrig:
             self.counters.counter('Trigger').register(trigger)
             self.counters.counter('Trigger').register(trigger + 'prescaled')
 
@@ -198,9 +198,10 @@ class TriggerAnalyzer(Analyzer):
             trigger_infos.append(TriggerInfo(trigger_name, index, fired, prescale))
 
             if fired and (prescale == 1 or self.cfg_ana.usePrescaled):
-                if trigger_name in self.triggerList:
-                    trigger_passed = True
+                if trigger_name in self.triggerList + self.extraTrig:
                     self.counters.counter('Trigger').inc(trigger_name)            
+                    if trigger_name in self.triggerList:
+                        trigger_passed = True
                 triggers_fired.append(trigger_name)
             elif fired:
                 print 'WARNING: Trigger not passing because of prescale', trigger_name
@@ -263,7 +264,7 @@ class TriggerAnalyzer(Analyzer):
                         setattr(event, 'probe', True)
                         break
 
-        self.counters.counter('Trigger').inc('HLT')
+        self.counters.counter('Trigger').inc('HLT')        
         return True
 
     def __str__(self):

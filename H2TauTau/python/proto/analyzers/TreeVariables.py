@@ -112,10 +112,11 @@ particle_vars = [
 
 # stage-2 L1 object
 l1obj_vars = [
-    Variable('iso' , lambda p: p.hwIso()),
-    Variable('qual', lambda p: p.hwQual()),
-    Variable('type', lambda p: p.type),
-    Variable('bx'  , lambda p: p.bx),
+    Variable('iso'  , lambda p: p.hwIso()),
+    Variable('qual' , lambda p: p.hwQual()),
+    Variable('type' , lambda p: p.type),
+    Variable('bx'   , lambda p: p.bx),
+    Variable('index', lambda p: p.index),
 ]
 
 # generic lepton
