@@ -162,8 +162,13 @@ class DiLeptonAnalyzer(Analyzer):
                 self.counters.counter('DiLepton').inc(
                     'leg2 offline cuts passed')
 
+        if hasattr(self.cfg_ana, 'noTrigMatching') and self.cfg_ana.noTrigMatching:
+            match = False
+        else:
+            match = True
+        
         # Trigger matching; both legs
-        if len(self.cfg_comp.triggers) > 0:
+        if len(self.cfg_comp.triggers) > 0 and match:
             requireAllMatched = hasattr(self.cfg_ana, 'allTriggerObjMatched') \
                 and self.cfg_ana.allTriggerObjMatched
 
@@ -322,19 +327,33 @@ class DiLeptonAnalyzer(Analyzer):
             legs = legs[:1]
 
         if hasattr(self.cfg_ana, 'filtersToMatch'):
-            filtersToMatch = self.cfg_ana.filtersToMatch[0]
-            leg = legs[self.cfg_ana.filtersToMatch[1] - 1]
-            triggerObjects = self.handles['triggerObjects'].product()
+            for it in self.cfg_ana.filtersToMatch:
+                filtersToMatch = it[0]
+                leg = legs[it[1] - 1]
+                leg.tos = []
+                triggerObjects = self.handles['triggerObjects'].product()
+                for item in product(triggerObjects, filtersToMatch):
+                    to     = item[0]
+                    filter = item[1]
+                    
+                    if not to.hasFilterLabel(filter):
+                        continue
+                    
+                    # RIC: this does not mean that the last filter is fired!
+                    #      you need to make sure the filter you're requiring
+                    #      *is* the last filter, regardless of its position
+                    #      in the collection
+                    # print to.filterLabels()[-1], to.filterLabels()[-1] != filter
+                    #if to.filterLabels()[-1] != filter:
+                    #    continue
 
-            for item in product(triggerObjects, filtersToMatch):
-                to     = item[0]
-                filter = item[1]
-                print to.filterLabels()[-1], to.filterLabels()[-1] != filter
-                if to.filterLabels()[-1] != filter:
-                    continue
-#                 import pdb ; pdb.set_trace()
-                if self.trigObjMatched(to, [leg]):
-                    setattr(leg, filter, to)
+                    if self.trigObjMatched(to, [leg]):
+                        setattr(leg, filter, to)
+                        leg.tos.append(to)
+                    
+                # RIC: assign as trigger object the one with the highest pt
+                if leg.tos:
+                    leg.to = sorted(leg.tos, key=lambda x: x.pt(), reverse=True)[0]
                     
         if not self.cfg_comp.triggerobjects:
             if self.cfg_ana.verbose:

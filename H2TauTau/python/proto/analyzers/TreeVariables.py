@@ -35,6 +35,10 @@ event_vars = [
     Variable('n_jets_csvl', lambda ev : sum(1 for jet in ev.cleanJets if jet.btagWP('CSVv2IVFL')), type=int),
     Variable('n_vertices', lambda ev : len(ev.vertices), type=int),
     Variable('rho', lambda ev : ev.rho),
+    Variable('hlt_calo_rho'),
+    Variable('hlt_calo_rho_eta2p5'),
+    Variable('hlt_pf_rho'),
+    Variable('hlt_pf_rho_reg'),
     Variable('weight', lambda ev : ev.eventWeight),
     Variable('weight_vertex', lambda ev : ev.puWeight),
     # # Add back for embedded samples once needed
@@ -113,6 +117,15 @@ particle_vars = [
     Variable('phi', lambda p: p.phi()),
     Variable('charge', lambda p: p.charge() if hasattr(p, 'charge') else 0), # charge may be non-integer for gen particles
     Variable('mass', lambda p: p.mass()),
+]
+
+# stage-2 L1 object
+l1obj_vars = [
+    Variable('iso'  , lambda p: p.hwIso()),
+    Variable('qual' , lambda p: p.hwQual()),
+    Variable('type' , lambda p: p.type),
+    Variable('bx'   , lambda p: p.bx),
+    Variable('index', lambda p: p.index),
 ]
 
 # generic lepton

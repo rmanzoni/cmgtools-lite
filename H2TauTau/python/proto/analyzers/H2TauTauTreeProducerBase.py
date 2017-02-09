@@ -1,7 +1,7 @@
 from PhysicsTools.Heppy.analyzers.core.TreeAnalyzerNumpy import TreeAnalyzerNumpy
 
 from CMGTools.H2TauTau.proto.analyzers.varsDictionary import vars as var_dict
-from CMGTools.H2TauTau.proto.analyzers.TreeVariables import event_vars, ditau_vars, particle_vars, lepton_vars, electron_vars, muon_vars, tau_vars, tau_vars_extra, jet_vars, jet_vars_extra, geninfo_vars, vbf_vars, svfit_vars
+from CMGTools.H2TauTau.proto.analyzers.TreeVariables import event_vars, ditau_vars, particle_vars, lepton_vars, electron_vars, muon_vars, tau_vars, tau_vars_extra, jet_vars, jet_vars_extra, geninfo_vars, vbf_vars, svfit_vars, l1obj_vars
 
 from CMGTools.H2TauTau.proto.physicsobjects.DiObject import DiTau
 
@@ -131,6 +131,16 @@ class H2TauTauTreeProducerBase(TreeAnalyzerNumpy):
             if hasattr(diLepton, 'svfit_Taus'):
                 for i, tau in enumerate(diLepton.svfitTaus()):
                     self.fillParticle(tree, 'svfit_l' + str(i + 1), tau)
+
+    # stage-2 L1 object
+    def bookL1object(self, tree, p_name):
+        self.bookParticle(tree, p_name)
+        self.bookGeneric(tree, l1obj_vars, p_name)
+
+    # stage-2 L1 object
+    def fillL1object(self, tree, p_name, l1obj):
+        self.fillParticle(tree, p_name, l1obj)
+        self.fillGeneric(tree, l1obj_vars, l1obj, p_name)
 
     # lepton
     def bookLepton(self, tree, p_name):

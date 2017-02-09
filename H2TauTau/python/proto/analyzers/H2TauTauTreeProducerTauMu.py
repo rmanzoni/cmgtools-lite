@@ -10,7 +10,9 @@ class H2TauTauTreeProducerTauMu(H2TauTauTreeProducer):
     def declareVariables(self, setup):
 
         super(H2TauTauTreeProducerTauMu, self).declareVariables(setup)
-
+        
+        self.var(self.tree, 'period')
+        
         self.bookTau(self.tree, 'l2')
         self.bookMuon(self.tree, 'l1')
 
@@ -30,13 +32,42 @@ class H2TauTauTreeProducerTauMu(H2TauTauTreeProducer):
         self.var(self.tree, 'l2_weight_fakerate_down')
 
         self.var(self.tree, 'trigger_isomu22')
+        self.var(self.tree, 'trigger_isomu24')
+        self.var(self.tree, 'trigger_isomu22eta2p1')
         self.var(self.tree, 'trigger_isotkmu22')
-        self.var(self.tree, 'trigger_isomu19tau20')
+
+        self.var(self.tree, 'trigger_isomu19medisotau32'           )
+        self.var(self.tree, 'trigger_isomu21medisotau32'           )
+        self.var(self.tree, 'trigger_isomu19medcombisotau32'       )
+        self.var(self.tree, 'trigger_isomu21medcombisotau32'       )
+        self.var(self.tree, 'trigger_isomu19looseisotau20_singlel1')
+        self.var(self.tree, 'trigger_isomu21looseisotau20_singlel1')
+        self.var(self.tree, 'trigger_isomu19loosecombisotau20'     )
+        self.var(self.tree, 'trigger_isomu19tightcombisotau32'     )
+        self.var(self.tree, 'trigger_isomu21tightcombisotau32'     )
+        self.var(self.tree, 'trigger_isomu19looseisotau20'         )
+        self.var(self.tree, 'trigger_isomu21looseisotau20'         )
 
         self.var(self.tree, 'trigger_matched_isomu22')
+        self.var(self.tree, 'trigger_matched_isomu24')
+        self.var(self.tree, 'trigger_matched_isomu22eta2p1')
         self.var(self.tree, 'trigger_matched_isotkmu22')
         self.var(self.tree, 'trigger_matched_isomu19tau20')
 
+        self.var(self.tree, 'trigger_matched_isomu19medisotau32'           )
+        self.var(self.tree, 'trigger_matched_isomu21medisotau32'           )
+        self.var(self.tree, 'trigger_matched_isomu19medcombisotau32'       )
+        self.var(self.tree, 'trigger_matched_isomu21medcombisotau32'       )
+        self.var(self.tree, 'trigger_matched_isomu19looseisotau20_singlel1')
+        self.var(self.tree, 'trigger_matched_isomu21looseisotau20_singlel1')
+        self.var(self.tree, 'trigger_matched_isomu19loosecombisotau20'     )
+        self.var(self.tree, 'trigger_matched_isomu19tightcombisotau32'     )
+        self.var(self.tree, 'trigger_matched_isomu21tightcombisotau32'     )
+        self.var(self.tree, 'trigger_matched_isomu19looseisotau20'         )
+        self.var(self.tree, 'trigger_matched_isomu21looseisotau20'         )
+
+        self.var(self.tree, 'in_golden_json')
+        
         if hasattr(self.cfg_ana, 'addIsoInfo') and self.cfg_ana.addIsoInfo:
             self.var(self.tree, 'l1_puppi_iso_pt')
             self.var(self.tree, 'l1_puppi_iso04_pt')
@@ -64,13 +95,13 @@ class H2TauTauTreeProducerTauMu(H2TauTauTreeProducer):
             self.var(self.tree, 'probe')
             self.bookParticle(self.tree, 'l1_trig_obj')
             self.bookParticle(self.tree, 'l2_trig_obj')
-            self.bookParticle(self.tree, 'l1_L1')
-            self.bookParticle(self.tree, 'l2_L1')
-            self.var(self.tree, 'l1_L1_type')
-            self.var(self.tree, 'l2_L1_type')
-            # RM add further branches related to the HLT filter matching by hand.
-            #    I cannot find a better solution for the moment 14/10/2015
-            self.bookParticle(self.tree, 'l2_hltL2Tau30eta2p2')
+            self.bookL1object(self.tree, 'l1_L1')
+            self.bookL1object(self.tree, 'l2_L1')
+
+        if hasattr(self.cfg_ana, 'addParticles'):
+            for particle in self.cfg_ana.addParticles:
+                self.bookParticle(self.tree, 'l2_%s' %particle)
+            
 
 
     def bookTrackInfo(self, name):
@@ -119,6 +150,19 @@ class H2TauTauTreeProducerTauMu(H2TauTauTreeProducer):
 
         super(H2TauTauTreeProducerTauMu, self).process(event)
 
+        if hasattr(event, 'passSecondJSON'):
+            self.fill(self.tree, 'in_golden_json', event.passSecondJSON)
+        
+        if self.cfg_comp.isData:
+            if '2016A' in self.cfg_comp.name: self.fill(self.tree, 'period', 0)
+            if '2016B' in self.cfg_comp.name: self.fill(self.tree, 'period', 1)
+            if '2016C' in self.cfg_comp.name: self.fill(self.tree, 'period', 2)
+            if '2016D' in self.cfg_comp.name: self.fill(self.tree, 'period', 3)
+            if '2016E' in self.cfg_comp.name: self.fill(self.tree, 'period', 4)
+            if '2016F' in self.cfg_comp.name: self.fill(self.tree, 'period', 5)
+            if '2016G' in self.cfg_comp.name: self.fill(self.tree, 'period', 6)
+            if '2016H' in self.cfg_comp.name: self.fill(self.tree, 'period', 7)
+        
         tau = event.diLepton.leg2()
         muon = event.diLepton.leg1()
        
@@ -174,13 +218,39 @@ class H2TauTauTreeProducerTauMu(H2TauTauTreeProducer):
         fired_triggers = [info.name for info in getattr(event, 'trigger_infos', []) if info.fired]
 
         self.fill(self.tree, 'trigger_isomu22', any('IsoMu22_v' in name for name in fired_triggers))
+        self.fill(self.tree, 'trigger_isomu24', any('IsoMu24_v' in name for name in fired_triggers))
+        self.fill(self.tree, 'trigger_isomu22eta2p1', any('IsoMu22_eta2p1_v' in name for name in fired_triggers))
         self.fill(self.tree, 'trigger_isotkmu22', any('IsoTkMu22_v' in name for name in fired_triggers))
-        self.fill(self.tree, 'trigger_isomu19tau20', any('IsoMu19_eta2p1_LooseIsoPFTau20_v' in name for name in fired_triggers))
+
+        self.fill(self.tree, 'trigger_isomu19medisotau32'           , any('HLT_IsoMu19_eta2p1_MediumIsoPFTau32_Trk1_eta2p1_Reg_v'         in name for name in fired_triggers))
+        self.fill(self.tree, 'trigger_isomu21medisotau32'           , any('HLT_IsoMu21_eta2p1_MediumIsoPFTau32_Trk1_eta2p1_Reg_v'         in name for name in fired_triggers))
+        self.fill(self.tree, 'trigger_isomu19medcombisotau32'       , any('HLT_IsoMu19_eta2p1_MediumCombinedIsoPFTau32_Trk1_eta2p1_Reg_v' in name for name in fired_triggers))
+        self.fill(self.tree, 'trigger_isomu21medcombisotau32'       , any('HLT_IsoMu21_eta2p1_MediumCombinedIsoPFTau32_Trk1_eta2p1_Reg_v' in name for name in fired_triggers))
+        self.fill(self.tree, 'trigger_isomu19looseisotau20_singlel1', any('HLT_IsoMu19_eta2p1_LooseIsoPFTau20_SingleL1_v'                 in name for name in fired_triggers))
+        self.fill(self.tree, 'trigger_isomu21looseisotau20_singlel1', any('HLT_IsoMu21_eta2p1_LooseIsoPFTau20_SingleL1_v'                 in name for name in fired_triggers))
+        self.fill(self.tree, 'trigger_isomu19loosecombisotau20'     , any('HLT_IsoMu19_eta2p1_LooseCombinedIsoPFTau20_v'                  in name for name in fired_triggers))
+        self.fill(self.tree, 'trigger_isomu19tightcombisotau32'     , any('HLT_IsoMu19_eta2p1_TightCombinedIsoPFTau32_Trk1_eta2p1_Reg_v'  in name for name in fired_triggers))
+        self.fill(self.tree, 'trigger_isomu21tightcombisotau32'     , any('HLT_IsoMu21_eta2p1_TightCombinedIsoPFTau32_Trk1_eta2p1_Reg_v'  in name for name in fired_triggers))
+        self.fill(self.tree, 'trigger_isomu19looseisotau20'         , any('HLT_IsoMu19_eta2p1_LooseIsoPFTau20_v'                          in name for name in fired_triggers))
+        self.fill(self.tree, 'trigger_isomu21looseisotau20'         , any('HLT_IsoMu21_eta2p1_LooseIsoPFTau20_v'                          in name for name in fired_triggers))
 
         matched_paths = getattr(event.diLepton, 'matchedPaths', [])
         self.fill(self.tree, 'trigger_matched_isomu22', any('IsoMu22_v' in name for name in matched_paths))
+        self.fill(self.tree, 'trigger_matched_isomu24', any('IsoMu24_v' in name for name in matched_paths))
+        self.fill(self.tree, 'trigger_matched_isomu22eta2p1', any('IsoMu22_eta2p1_v' in name for name in matched_paths))
         self.fill(self.tree, 'trigger_matched_isotkmu22', any('IsoTkMu22_v' in name for name in matched_paths))
-        self.fill(self.tree, 'trigger_matched_isomu19tau20', any('IsoMu19_eta2p1_LooseIsoPFTau20_v' in name for name in matched_paths))
+
+        self.fill(self.tree, 'trigger_matched_isomu19medisotau32'           , any('HLT_IsoMu19_eta2p1_MediumIsoPFTau32_Trk1_eta2p1_Reg_v'         in name for name in matched_paths))
+        self.fill(self.tree, 'trigger_matched_isomu21medisotau32'           , any('HLT_IsoMu21_eta2p1_MediumIsoPFTau32_Trk1_eta2p1_Reg_v'         in name for name in matched_paths))
+        self.fill(self.tree, 'trigger_matched_isomu19medcombisotau32'       , any('HLT_IsoMu19_eta2p1_MediumCombinedIsoPFTau32_Trk1_eta2p1_Reg_v' in name for name in matched_paths))
+        self.fill(self.tree, 'trigger_matched_isomu21medcombisotau32'       , any('HLT_IsoMu21_eta2p1_MediumCombinedIsoPFTau32_Trk1_eta2p1_Reg_v' in name for name in matched_paths))
+        self.fill(self.tree, 'trigger_matched_isomu19looseisotau20_singlel1', any('HLT_IsoMu19_eta2p1_LooseIsoPFTau20_SingleL1_v'                 in name for name in matched_paths))
+        self.fill(self.tree, 'trigger_matched_isomu21looseisotau20_singlel1', any('HLT_IsoMu21_eta2p1_LooseIsoPFTau20_SingleL1_v'                 in name for name in matched_paths))
+        self.fill(self.tree, 'trigger_matched_isomu19loosecombisotau20'     , any('HLT_IsoMu19_eta2p1_LooseCombinedIsoPFTau20_v'                  in name for name in matched_paths))
+        self.fill(self.tree, 'trigger_matched_isomu19tightcombisotau32'     , any('HLT_IsoMu19_eta2p1_TightCombinedIsoPFTau32_Trk1_eta2p1_Reg_v'  in name for name in matched_paths))
+        self.fill(self.tree, 'trigger_matched_isomu21tightcombisotau32'     , any('HLT_IsoMu21_eta2p1_TightCombinedIsoPFTau32_Trk1_eta2p1_Reg_v'  in name for name in matched_paths))
+        self.fill(self.tree, 'trigger_matched_isomu19looseisotau20'         , any('HLT_IsoMu19_eta2p1_LooseIsoPFTau20_v'                          in name for name in matched_paths))
+        self.fill(self.tree, 'trigger_matched_isomu21looseisotau20'         , any('HLT_IsoMu21_eta2p1_LooseIsoPFTau20_v'                          in name for name in matched_paths))
 
         if hasattr(self.cfg_ana, 'addTauTrackInfo') and self.cfg_ana.addTauTrackInfo:
             # Leading CH part
@@ -224,21 +294,43 @@ class H2TauTauTreeProducerTauMu(H2TauTauTreeProducer):
             self.fill(self.tree, 'l1_mini_reliso', muon.miniRelIso)
 
         if hasattr(self.cfg_ana, 'addTnPInfo') and self.cfg_ana.addTnPInfo:
-            self.fill(self.tree, 'tag', event.tag)
-            self.fill(self.tree, 'probe', event.probe)
+            #self.fill(self.tree, 'tag', event.tag)
+            #self.fill(self.tree, 'probe', event.probe)
+            
             if hasattr(muon, 'to'):
                 self.fillParticle(self.tree, 'l1_trig_obj', muon.to)
             if hasattr(tau, 'to'):            
                 self.fillParticle(self.tree, 'l2_trig_obj', tau.to)
-            if hasattr(muon, 'L1'):
-                self.fillParticle(self.tree, 'l1_L1', muon.L1)
-                self.fill(self.tree, 'l1_L1_type', muon.L1flavour)
-            if hasattr(tau, 'L1'):
-                self.fillParticle(self.tree, 'l2_L1', tau.L1)
-                self.fill(self.tree, 'l2_L1_type', tau.L1flavour)
-            # RM add further branches related to the HLT filter matching by hand.
-            #    I cannot find a better solution for the moment 14/10/2015
-            if hasattr(tau, 'hltL2Tau30eta2p2'):
-                self.fillParticle(self.tree, 'l2_hltL2Tau30eta2p2', tau.hltL2Tau30eta2p2)
+            if hasattr(muon, 'L1matches') and len(muon.L1matches):
+                self.fillL1object(self.tree, 'l1_L1', muon.L1matches[0])
+            if hasattr(tau, 'L1matches') and len(tau.L1matches):
+                isolated     = [l1 for l1 in tau.L1matches if 
+                                l1.pt() > 28. and \
+                                l1.hwIso() > 0 and \
+                                abs(l1.bx) == 0]
+                non_isolated = [l1 for l1 in tau.L1matches if 
+                                l1.pt() > 28. and \
+                                l1.hwIso() == 0 and \
+                                abs(l1.bx) == 0]
+                if len(isolated): 
+                    tauL1 = isolated[0]
+                elif len(non_isolated): 
+                    tauL1 = non_isolated[0]
+                else:
+                    tauL1 = tau.L1matches[0]
+                self.fillL1object(self.tree, 'l2_L1', tauL1)
+
+        if hasattr(self.cfg_ana, 'addParticles'):
+            for particle in self.cfg_ana.addParticles:
+                if hasattr(tau, particle):
+                    #import pdb ; pdb.set_trace()
+                    self.fillParticle(self.tree, 'l2_%s' %particle, getattr(tau, particle))
+
+                #if not hasattr(tau, 'triggerobjects'):
+                #    continue
+                #for to in tau.triggerobjects:
+                #    if any(particle == i for i in to.filterLabels()):
+                #        self.fillParticle(self.tree, 'l2_%s' %particle, to)
+                #        break               
 
         self.fillTree(event)
