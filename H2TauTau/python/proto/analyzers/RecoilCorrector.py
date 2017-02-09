@@ -130,5 +130,6 @@ class RecoilCorrector(Analyzer):
 
         px_new, py_new = new.first, new.second
 
-        event.pfmet.setP4(LorentzVector(px_new, py_new, 0., math.sqrt(px_new*px_new + py_new*py_new)))
+        newMET = ROOT.Math.LorentzVector(ROOT.Math.PxPyPzE4D("double"))(px_new, py_new, 0., math.sqrt(px_new*px_new + py_new*py_new))
+        event.pfmet.setP4(newMET)
 
