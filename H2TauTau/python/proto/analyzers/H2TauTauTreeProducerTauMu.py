@@ -103,7 +103,7 @@ class H2TauTauTreeProducerTauMu(H2TauTauTreeProducer):
                 self.bookParticle(self.tree, 'l2_%s' %particle)
             
 
-
+    @staticmethod
     def bookTrackInfo(self, name):
         self.var(self.tree, name + '_pt')
         self.var(self.tree, name + '_dxy')
@@ -118,6 +118,7 @@ class H2TauTauTreeProducerTauMu(H2TauTauTreeProducer):
         self.var(self.tree, name + '_n_missing_inner')
         self.var(self.tree, name + '_high_purity')
 
+    @staticmethod
     def fillTrackInfo(self, track, name='tau_track'):
         pt = track.pt()
         ndof = track.pseudoTrack().ndof()
