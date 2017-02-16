@@ -724,6 +724,90 @@ EWKZToLL2Jets,
 EWKZToNuNu2Jets,
 ]
 
+### Heavy gauge bosons to taus
+ZpTTM500  = kreator.makeMCComponent("ZpTTM500" , "/ZprimeToTauTau_M-500_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+ZpTTM750  = kreator.makeMCComponent("ZpTTM750" , "/ZprimeToTauTau_M-750_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+ZpTTM1000 = kreator.makeMCComponent("ZpTTM1000", "/ZprimeToTauTau_M-1000_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "CMS", ".*root", 1.)
+ZpTTM1250 = kreator.makeMCComponent("ZpTTM1250", "/ZprimeToTauTau_M-1250_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "CMS", ".*root", 1.)
+ZpTTM1500 = kreator.makeMCComponent("ZpTTM1500", "/ZprimeToTauTau_M-1500_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "CMS", ".*root", 1.)
+ZpTTM1750 = kreator.makeMCComponent("ZpTTM1750", "/ZprimeToTauTau_M-1750_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "CMS", ".*root", 1.)
+ZpTTM2000 = kreator.makeMCComponent("ZpTTM2000", "/ZprimeToTauTau_M-2000_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "CMS", ".*root", 1.)
+ZpTTM2500 = kreator.makeMCComponent("ZpTTM2500", "/ZprimeToTauTau_M-2500_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "CMS", ".*root", 1.)
+ZpTTM3000 = kreator.makeMCComponent("ZpTTM3000", "/ZprimeToTauTau_M-3000_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "CMS", ".*root", 1.)
+ZpTTM3500 = kreator.makeMCComponent("ZpTTM3500", "/ZprimeToTauTau_M-3500_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "CMS", ".*root", 1.)
+ZpTTM4000 = kreator.makeMCComponent("ZpTTM4000", "/ZprimeToTauTau_M-4000_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "CMS", ".*root", 1.)
+
+Zprimes = [
+    ZpTTM500 ,
+    ZpTTM750 ,
+    ZpTTM1000,
+    ZpTTM1250,
+    ZpTTM1500,
+    ZpTTM1750,
+    ZpTTM2000,
+    ZpTTM2500,
+    ZpTTM3000,
+    ZpTTM3500,
+    ZpTTM4000,
+]
+
+WpTauNuM400  = kreator.makeMCComponent("WpTauNuM400"  , "/WprimeToTauNu_M-400_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM600  = kreator.makeMCComponent("WpTauNuM600"  , "/WprimeToTauNu_M-600_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM1000 = kreator.makeMCComponent("WpTauNuM1000" , "/WprimeToTauNu_M-1000_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM1200 = kreator.makeMCComponent("WpTauNuM1200" , "/WprimeToTauNu_M-1200_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM1400 = kreator.makeMCComponent("WpTauNuM1400" , "/WprimeToTauNu_M-1400_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM1600 = kreator.makeMCComponent("WpTauNuM1600" , "/WprimeToTauNu_M-1600_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM1800 = kreator.makeMCComponent("WpTauNuM1800" , "/WprimeToTauNu_M-1800_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM2000 = kreator.makeMCComponent("WpTauNuM2000" , "/WprimeToTauNu_M-2000_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM2200 = kreator.makeMCComponent("WpTauNuM2200" , "/WprimeToTauNu_M-2200_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM2400 = kreator.makeMCComponent("WpTauNuM2400" , "/WprimeToTauNu_M-2400_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM2600 = kreator.makeMCComponent("WpTauNuM2600" , "/WprimeToTauNu_M-2600_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM2800 = kreator.makeMCComponent("WpTauNuM2800" , "/WprimeToTauNu_M-2800_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM3000 = kreator.makeMCComponent("WpTauNuM3000" , "/WprimeToTauNu_M-3000_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM3200 = kreator.makeMCComponent("WpTauNuM3200" , "/WprimeToTauNu_M-3200_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM3400 = kreator.makeMCComponent("WpTauNuM3400" , "/WprimeToTauNu_M-3400_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM3600 = kreator.makeMCComponent("WpTauNuM3600" , "/WprimeToTauNu_M-3600_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM3800 = kreator.makeMCComponent("WpTauNuM3800" , "/WprimeToTauNu_M-3800_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM4000 = kreator.makeMCComponent("WpTauNuM4000" , "/WprimeToTauNu_M-4000_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM4200 = kreator.makeMCComponent("WpTauNuM4200" , "/WprimeToTauNu_M-4200_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM4400 = kreator.makeMCComponent("WpTauNuM4400" , "/WprimeToTauNu_M-4400_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM4600 = kreator.makeMCComponent("WpTauNuM4600" , "/WprimeToTauNu_M-4600_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM4800 = kreator.makeMCComponent("WpTauNuM4800" , "/WprimeToTauNu_M-4800_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM5000 = kreator.makeMCComponent("WpTauNuM5000" , "/WprimeToTauNu_M-5000_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM5200 = kreator.makeMCComponent("WpTauNuM5200" , "/WprimeToTauNu_M-5200_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM5400 = kreator.makeMCComponent("WpTauNuM5400" , "/WprimeToTauNu_M-5400_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM5600 = kreator.makeMCComponent("WpTauNuM5600" , "/WprimeToTauNu_M-5600_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+WpTauNuM5800 = kreator.makeMCComponent("WpTauNuM5800" , "/WprimeToTauNu_M-5800_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM" , "CMS", ".*root", 1.)
+
+Wprimes = [
+    WpTauNuM400 ,
+    WpTauNuM600 ,
+    WpTauNuM1000,
+    WpTauNuM1200,
+    WpTauNuM1400,
+    WpTauNuM1600,
+    WpTauNuM1800,
+    WpTauNuM2000,
+    WpTauNuM2200,
+    WpTauNuM2400,
+    WpTauNuM2600,
+    WpTauNuM2800,
+    WpTauNuM3000,
+    WpTauNuM3200,
+    WpTauNuM3400,
+    WpTauNuM3600,
+    WpTauNuM3800,
+    WpTauNuM4000,
+    WpTauNuM4200,
+    WpTauNuM4400,
+    WpTauNuM4600,
+    WpTauNuM4800,
+    WpTauNuM5000,
+    WpTauNuM5200,
+    WpTauNuM5400,
+    WpTauNuM5600,
+    WpTauNuM5800,
+]
 ### ----------------------------- summary ----------------------------------------
 
 mcSamples = TTs + SingleTop + VJets + DYJetsM50HT + DYJetsM5to50HT + WJetsToLNuHT + WNJets + GJetsHT + ZJetsToNuNuHT + QCDHT + QCDPtbcToE + QCDPt + QCDPtEMEnriched + [QCD_Mu15] + QCD_Mu5 +  DiBosons + TriBosons + TTV + Higgs + Rares + EWKV2Jets # + [TChiSlepSnu,T1tttt_2016,T5qqqqVV_2016]
