@@ -23,10 +23,10 @@ event_vars = [
     Variable('orbit_number', lambda ev : (ev.input.eventAuxiliary().orbitNumber() * ev.input.eventAuxiliary().isRealData()), type=int),
     Variable('is_data', lambda ev: ev.input.eventAuxiliary().isRealData(), type=int),
     Variable('nPU', lambda ev : -99 if getattr(ev, 'nPU', -1) is None else getattr(ev, 'nPU', -1)),
-    Variable('pass_leptons', lambda ev : ev.isSignal, type=int),
-    Variable('veto_dilepton', lambda ev : not ev.leptonAccept, type=int),
-    Variable('veto_thirdlepton', lambda ev : not ev.thirdLeptonVeto, type=int),
-    Variable('veto_otherlepton', lambda ev : not ev.otherLeptonVeto, type=int),
+    Variable('pass_leptons', lambda ev : ev.isSignal if hasattr(ev, 'isSignal') else default(), type=int),
+    Variable('veto_dilepton', lambda ev : not ev.leptonAccept if hasattr(ev, 'leptonAccept') else default(), type=int),
+    Variable('veto_thirdlepton', lambda ev : not ev.thirdLeptonVeto if hasattr(ev, 'thirdLeptonVeto') else default(), type=int),
+    Variable('veto_otherlepton', lambda ev : not ev.otherLeptonVeto if hasattr(ev, 'otherLeptonVeto') else default(), type=int),
     Variable('n_jets', lambda ev : len(ev.cleanJets30), type=int),
     Variable('n_jets_puid', lambda ev : sum(1 for j in ev.cleanJets30 if j.puJetId()), type=int),
     Variable('n_jets_20', lambda ev : len(ev.cleanJets), type=int),
@@ -43,7 +43,7 @@ event_vars = [
     Variable('weight_vertex', lambda ev : ev.puWeight),
     # # Add back for embedded samples once needed
     # Variable('weight_embed', lambda ev : getattr(ev, 'embedWeight', 1.)),
-    Variable('weight_njet', lambda ev : ev.NJetWeight),
+    Variable('weight_njet', lambda ev : ev.NJetWeight if hasattr(ev, 'NJetWeight') else default()),
     Variable('weight_dy', lambda ev : getattr(ev, 'dy_weight', 1.)),
     # # Add back the following only for ggH samples once needed
     # Variable('weight_hqt', lambda ev : getattr(ev, 'higgsPtWeight', 1.)),
