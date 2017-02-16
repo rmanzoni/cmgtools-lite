@@ -78,13 +78,12 @@ class L1Stage2TriggerAnalyzer(Analyzer):
         if hasattr(self.cfg_ana, 'dR'):
             dRmax = self.cfg_ana.dR
         
-        legs = [event.diLepton.leg1(), event.diLepton.leg2()]    
+        legs = self.cfg_ana.getter(event)    
         
-        legs[0].L1matches = []
-        legs[1].L1matches = []
+        for leg in legs:
+            leg.L1matches = []
         
         mytaus = []
-        
                     
         for coll in collections:
             mycoll = self.handles[coll].product()
@@ -139,6 +138,7 @@ setattr(L1Stage2TriggerAnalyzer, 'defaultConfig',
     cfg.Analyzer(
         class_object=L1Stage2TriggerAnalyzer,
         collections=[Stage2L1ObjEnum.Muon, Stage2L1ObjEnum.Tau],
+        getter = lambda event : [event.diLepton.leg1(), event.diLepton.leg2()],
 #         collections=[Stage2L1ObjEnum.Tau],
         requireMatches=[],
         bx=0,
