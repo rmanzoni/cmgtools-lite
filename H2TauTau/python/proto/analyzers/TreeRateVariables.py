@@ -1,6 +1,9 @@
 from PhysicsTools.HeppyCore.utils.deltar import deltaR, deltaPhi
 from CMGTools.H2TauTau.proto.analyzers.TreeVariables import Variable
 
+def default():
+    return -999.
+
 # event variables
 event_vars = [
     Variable('run', type=int),
@@ -9,9 +12,9 @@ event_vars = [
     Variable('bx', lambda ev: (ev.input.eventAuxiliary().bunchCrossing() * ev.input.eventAuxiliary().isRealData()), type=int),
     Variable('orbit_number', lambda ev: (ev.input.eventAuxiliary().orbitNumber() * ev.input.eventAuxiliary().isRealData()), type=int),
     Variable('is_data', lambda ev: ev.input.eventAuxiliary().isRealData(), type=int),
-    Variable('nPU', lambda ev: -99 if getattr(ev, 'nPU', -1) is None else getattr(ev, 'nPU', -1), type=int),
-    Variable('n_vertices', lambda ev: len(ev.vertices), type=int),
-    Variable('rho', lambda ev: ev.rho),
+    Variable('nPU', lambda ev: default() if getattr(ev, 'nPU', -1) is None else getattr(ev, 'nPU', -1), type=int),
+    Variable('n_vertices', lambda ev : len(ev.vertices) if hasattr(ev, 'vertices') else default(), type=int),
+    Variable('rho', lambda ev : ev.rho if hasattr(ev, 'vertices') else default()),
     Variable('hlt_calo_rho'),
     Variable('hlt_calo_rho_eta2p5'),
     Variable('hlt_pf_rho'),

@@ -187,6 +187,10 @@ class TriggerAnalyzer(Analyzer):
 
         trigger_infos = []
         triggers_fired = []
+
+        # which HLT paths are included?
+        # for i in range(names.size()): print names.triggerName(i)
+        # import pdb ; pdb.set_trace()
         
         for trigger_name in self.triggerList + self.extraTrig:
             index = names.triggerIndex(trigger_name)

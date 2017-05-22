@@ -36,7 +36,8 @@ class L2TriggerAnalyzer(Analyzer):
         )
 
         self.handles['hltL2TauIsoFilter'] = AutoHandle(
-            'hltL2TauIsoFilter',
+            #'hltL2TauIsoFilter',
+            'hltL2TauOpenIsoFilter',
             'trigger::TriggerFilterObjectWithRefs',
             mayFail            = True,
             disableAtFirstFail = False,
@@ -55,14 +56,27 @@ class L2TriggerAnalyzer(Analyzer):
 
         self.readCollections(event.input)
 
-        try:
-            event.hltL2TauPixelIsoTagProducerLegacy = self.handles['hltL2TauPixelIsoTagProducerLegacy'].product()
-            event.hltL2TauPixelIsoTagProducer       = self.handles['hltL2TauPixelIsoTagProducer'      ].product()
-            event.hltL2TauJetsIso                   = self.handles['hltL2TauJetsIso'                  ].product()
-            event.hltL2TauIsoFilter                 = self.handles['hltL2TauIsoFilter'                ].product()
-            event.hltL2TausForPixelIsolation        = self.handles['hltL2TausForPixelIsolation'       ].product()
-        except:
-            pass
+#         for coll in ['hltL2TauPixelIsoTagProducerLegacy'
+#                      'hltL2TauPixelIsoTagProducer'      
+#                      'hltL2TauJetsIso'                  
+#                      'hltL2TauIsoFilter'                
+#                      'hltL2TausForPixelIsolation']:     
+#             try:
+#                 setattr(event, coll, self.handles[coll].product())
+#             except:
+#                 pass
+
+              
+        try: event.hltL2TauPixelIsoTagProducerLegacy = self.handles['hltL2TauPixelIsoTagProducerLegacy'].product()
+        except: pass
+        try: event.hltL2TauPixelIsoTagProducer       = self.handles['hltL2TauPixelIsoTagProducer'      ].product()
+        except: pass
+        try: event.hltL2TauJetsIso                   = self.handles['hltL2TauJetsIso'                  ].product()
+        except: pass
+        try: event.hltL2TauIsoFilter                 = self.handles['hltL2TauIsoFilter'                ].product()
+        except: pass
+        try: event.hltL2TausForPixelIsolation        = self.handles['hltL2TausForPixelIsolation'       ].product()
+        except: pass
         
         if self.cfg_ana.verbose:
         
@@ -100,29 +114,36 @@ class L2TriggerAnalyzer(Analyzer):
         for l2jIndex in range(nL2jets):
             jet       = event.hltL2TauPixelIsoTagProducer.keyProduct().product().at(l2jIndex)
             iso       = event.hltL2TauPixelIsoTagProducer.value(l2jIndex)
-            isolegacy = event.hltL2TauPixelIsoTagProducerLegacy.value(l2jIndex)
+            #isolegacy = event.hltL2TauPixelIsoTagProducerLegacy.value(l2jIndex)
             
             l2jet             = Jet(jet)
             l2jet.L2iso       = iso
-            l2jet.L2isolegacy = isolegacy
+            #l2jet.L2isolegacy = isolegacy
             
             event.L2jets.append(l2jet)
         
-        for ti in event.trigger_infos:
-            for to, jet in product(ti.objects, event.L2jets):
+        if hasattr(event, 'trigger_infos'):
+            for ti in event.trigger_infos:
+                for to, jet in product(ti.objects, event.L2jets):
+    
+                    dR = deltaR(jet.eta(), jet.phi(), to.eta(), to.phi())
+                    
+                    if hasattr(to, 'L2dR'):
+                        dRmax = to.L2dR
+                    else:
+                        dRmax = self.dRmax 
+                    
+                    if dR < dRmax:
+                        to.L2          = jet            
+                        to.L2iso       = jet.L2iso      
+                        #to.L2isolegacy = jet.L2isolegacy
+                        to.L2dR        = dR
 
-                dR = deltaR(jet.eta(), jet.phi(), to.eta(), to.phi())
-                
-                if hasattr(to, 'L2dR'):
-                    dRmax = to.L2dR
-                else:
-                    dRmax = self.dRmax 
-                
-                if dR < dRmax:
-                    to.L2          = jet            
-                    to.L2iso       = jet.L2iso      
-                    to.L2isolegacy = jet.L2isolegacy
-                    to.L2dR        = dR
+        if hasattr(self.cfg_ana, 'tomatch'):
+            tomatch = self.cfg_ana.tomatch(event)
+            for itau, l2 in product(tomatch, event.L2jets):
+                if deltaR(itau, l2) < 0.3:
+                    itau.L2 = l2
                 
         # stop here if there's no diLepton. Useful for rate studies
         if not hasattr(event, 'diLepton'):
@@ -133,11 +154,11 @@ class L2TriggerAnalyzer(Analyzer):
                     
         event.diLepton.leg1().L2          = None
         event.diLepton.leg1().L2iso       = None
-        event.diLepton.leg1().L2isolegacy = None
+        #event.diLepton.leg1().L2isolegacy = None
 
         event.diLepton.leg2().L2          = None
         event.diLepton.leg2().L2iso       = None
-        event.diLepton.leg2().L2isolegacy = None
+        #event.diLepton.leg2().L2isolegacy = None
              
         for leg, l2jIndex in product(legs.keys(), range(nL2jets)):               
             dR = deltaR(jet.eta(), jet.phi(), leg.eta(), leg.phi())

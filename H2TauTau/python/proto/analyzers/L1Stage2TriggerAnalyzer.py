@@ -109,8 +109,11 @@ class L1Stage2TriggerAnalyzer(Analyzer):
 
                 myL1.type   = coll 
                 myL1.bx     = l1.bx
-                myL1.dR     = dR   
-                myL1.goodID = isinstance(l1, self.types[type(leg)])
+                myL1.dR     = dR
+                try:  
+                    myL1.goodID = isinstance(l1, self.types[type(leg)])
+                except:
+                    myL1.goodID = False
                                 
                 if dR < dRmax:
                     leg.L1matches.append(myL1)

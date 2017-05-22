@@ -14,31 +14,24 @@ class TauDiscriminatorAnalyzer(Analyzer):
         super(TauDiscriminatorAnalyzer, self).declareHandles()
 
         for k, v in self.cfg_ana.inputs.iteritems():
-            self.handles[k] = AutoHandle(v, 'reco::PFTauDiscriminator')        
-            self.handles[k].discriminator = True
-
-#         self.handles['l1taus'] = AutoHandle('Tau', 'BXVector<l1t::Tau>')
-            
-#         self.handles['hlt_trk_taus'] = AutoHandle('hltSelectedPFTausTrackPt0Reg', 'vector<reco::PFTau>')        
-#         self.handles['hlt_trk_taus'] = AutoHandle('hltSelectedPFTausTrackPt1Reg', 'vector<reco::PFTau>')        
+            self.handles[k] = AutoHandle(
+                v, 
+                'reco::PFTauDiscriminator',
+                mayFail            = True,
+                disableAtFirstFail = False,
+                lazy               = False
+            )        
 
     def process(self, event):
 
         self.readCollections(event.input)
         
-        if not(hasattr(self.cfg_ana, 'saveCollection') and self.cfg_ana.saveCollection):
-            taus = [tt for tt in [event.diLepton.leg1(), event.diLepton.leg2()] if isinstance(tt, Tau)]
+        taus = self.cfg_ana.tomatch(event)
         
-        
-#         l1taus = self.handles['l1taus'].product()
-                
         for k, v in self.handles.iteritems():
-            
-#             if k == 'l1taus':
-#                 continue
-                      
-#             if not(hasattr(v, 'discriminator') and getattr(v, 'discriminator')):
-#                 continue
+                
+            if not v.isValid():
+                continue
             
             # why reading a fucking map is so difficult?
             coll = v.product()
@@ -60,7 +53,6 @@ class TauDiscriminatorAnalyzer(Analyzer):
                 setattr(event, k, discriminators)
             
             else:
-                #for tau, map in product(taus, discriminators):
                 for tau in taus:
                     tau.dRhlt = 0.3
                     for map in discriminators:
@@ -68,25 +60,14 @@ class TauDiscriminatorAnalyzer(Analyzer):
                         if dR < tau.dRhlt:
                             setattr(tau, k, map.discriminator)
                             setattr(tau, 'hlt_tau', map.tau)
-                            tau.dRhlt = dR
-
-#             if k == 'trigger_charged5hits':
-#                 import pdb ; pdb.set_trace()
-
-#         hlt_trk_taus = self.handles['hlt_trk_taus'].product()        
-        
-#         for tau in taus:
-#             dRmax = 0.3    
-#             for hlt_tau in hlt_trk_taus:
-#                 dR = deltaR(tau.eta(), tau.phi(), hlt_tau.eta(), hlt_tau.phi())
-#                 if dR < dRmax:
-#                    setattr(tau, 'hlt_trk_tau', hlt_tau)
-#                    dRmax = dR
-        
-#         for tau in taus:        
-            #if hasattr(tau, 'hlt_trk_tau') and tau.hlt_trk_tau.leadPFChargedHadrCand().pt()<1.: 
-#             if tau.hlt_trk_tau.leadPFChargedHadrCand().pt()<10.: 
-#                 import pdb ; pdb.set_trace()
-        
-        
+                            tau.dRhlt = dR        
+            
+            if hasattr(self.cfg_ana, 'ptcut'):
+                discriminators = [dd for dd in discriminators if dd.tau.pt() > self.cfg_ana.ptcut]
+            if hasattr(self.cfg_ana, 'maxTriggerTaus'):
+                discriminators = discriminators[:min(self.cfg_ana.maxTriggerTaus, len(discriminators))]
+            
+            # append the tau discriminator collection to the event
+            setattr(event, k, discriminators)
+            
         return True

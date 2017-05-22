@@ -16,6 +16,21 @@ class TauTriggerTreeProducer(H2TauTauTreeProducerBase):
         super(TauTriggerTreeProducer, self).__init__(*args)
         self.maxNTaus = 99
 
+    def declareHandles(self):
+        super(TauTriggerTreeProducer, self).declareHandles()
+        if hasattr(self.cfg_ana, 'triggerObjectsHandle'):
+            myhandle = self.cfg_ana.triggerObjectsHandle
+            self.handles['triggerObjects'] = AutoHandle(
+                (myhandle[0], myhandle[1], myhandle[2]),
+                'std::vector<pat::TriggerObjectStandAlone>'
+                )
+        else:    
+            self.handles['triggerObjects'] =  AutoHandle(
+                'selectedPatTrigger',
+                'std::vector<pat::TriggerObjectStandAlone>'
+                )
+
+
     def declareVariables(self, setup):
 
         self.bookEvent(self.tree)
@@ -30,6 +45,7 @@ class TauTriggerTreeProducer(H2TauTauTreeProducerBase):
         self.bookTrackInfo('tau_lead_ch')
 
         self.var(self.tree, 'trigger_vlooseisotau140'   )
+        self.var(self.tree, 'trigger_mctau20'           )
 
 #         self.var(self.tree, 'trigger_isomu22'           )
 #         self.var(self.tree, 'trigger_isotkmu22'         )
@@ -75,6 +91,20 @@ class TauTriggerTreeProducer(H2TauTauTreeProducerBase):
 
         fired_triggers = [info.name for info in getattr(event, 'trigger_infos', []) if info.fired]
 
+
+        # make sure you select an unbiassed sample:
+        if event.input.eventAuxiliary().isRealData() and len(event.taus) == 1:
+            triggerObjects = self.handles['triggerObjects'].product()
+            # count how many objects have potentially fired IsoMu24
+            firedisomu24 = len([to.hasFilterLabel('hltL3crIsoL1sMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p09') for to in triggerObjects])
+            # remove taus from the count
+            for tau in event.taus:
+                firedisomu24 -= any(to.hasFilterLabel('hltL3crIsoL1sMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p09') for to in tau.tos)
+            # if the only object that fired IsoMu24 is a tau and there's only a tau, then the event is biassed, return false
+            if firedisomu24 == 0:
+                print 'the only tau in the event fired IsoMu24... neglect this event'
+                return False
+        
         for i_tau, tau in enumerate(event.taus):
                 
             if i_tau > self.maxNTaus: break
@@ -88,6 +118,7 @@ class TauTriggerTreeProducer(H2TauTauTreeProducerBase):
             self.fill(self.tree, 'trigger_matched_vlooseisotau140', any(to.hasFilterLabel('hltPFTau140TrackPt50LooseAbsOrRelVLooseIso') for to in tau.tos))
 
             self.fill(self.tree, 'trigger_vlooseisotau140'   , any('HLT_VLooseIsoPFTau140_Trk50_eta2p1_v'                    in name for name in fired_triggers))
+            self.fill(self.tree, 'trigger_mctau20'           , any('MC_LooseIsoPFTau20_v'                                    in name for name in fired_triggers))
 
 #             self.fill(self.tree, 'trigger_isomu22'           , any('HLT_IsoMu22_v'                                           in name for name in fired_triggers))
 #             self.fill(self.tree, 'trigger_isotkmu22'         , any('HLT_IsoTkMu22_v'                                         in name for name in fired_triggers))
@@ -110,9 +141,9 @@ class TauTriggerTreeProducer(H2TauTauTreeProducerBase):
 #             self.fill(self.tree, 'trigger_doubletau35'       , any('HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v'            in name for name in fired_triggers))
 #             self.fill(self.tree, 'trigger_doubletau35comb'   , any('HLT_DoubleMediumCombinedIsoPFTau35_Trk1_eta2p1_Reg_v'    in name for name in fired_triggers))
 
-            if tau.genp:
+            if hasattr(tau, 'genp') and tau.genp:
                 self.fillGenParticle(self.tree, 'tau_gen', tau.genp)
-                if tau.genJet():
+                if hasattr(tau, 'genJet') and tau.genJet():
                     self.fillGenParticle(self.tree, 'tau_gen_vis', tau.genJet())
                     self.fill(self.tree, 'tau_gen_decayMode', tauDecayModes.genDecayModeInt(tau.genJet()))
 

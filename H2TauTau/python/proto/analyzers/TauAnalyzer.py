@@ -52,14 +52,17 @@ class TauAnalyzer( Analyzer ):
 
         event.triggerObjects = self.handles['triggerObjects'].product()
 
-        event.genParticles = self.mchandles['genParticles'].product()
+        if not event.input.eventAuxiliary().isRealData():
+            event.genParticles = self.mchandles['genParticles'].product()
 
-        event.genleps    = [p for p in event.genParticles if abs(p.pdgId()) in [11, 13] and p.statusFlags().isPrompt()]
-        event.gentauleps = [p for p in event.genParticles if abs(p.pdgId()) in [11, 13] and p.statusFlags().isDirectPromptTauDecayProduct()]
-        event.gentaus    = [p for p in event.genParticles if abs(p.pdgId()) == 15 and p.statusFlags().isPrompt() and not any(abs(HTTGenAnalyzer.getFinalTau(p).daughter(i_d).pdgId()) in [11, 13] for i_d in xrange(HTTGenAnalyzer.getFinalTau(p).numberOfDaughters()))]
+            event.genleps    = [p for p in event.genParticles if abs(p.pdgId()) in [11, 13] and p.statusFlags().isPrompt()]
+            event.gentauleps = [p for p in event.genParticles if abs(p.pdgId()) in [11, 13] and p.statusFlags().isDirectPromptTauDecayProduct()]
+            event.gentaus    = [p for p in event.genParticles if abs(p.pdgId()) == 15 and p.statusFlags().isPrompt() and not any(abs(HTTGenAnalyzer.getFinalTau(p).daughter(i_d).pdgId()) in [11, 13] for i_d in xrange(HTTGenAnalyzer.getFinalTau(p).numberOfDaughters()))]
+
+            for tau in event.taus:
+                HTTGenAnalyzer.genMatch(event, tau, event.gentauleps, event.genleps, [], dR=0.2, matchAll=True)
 
         for tau in event.taus:
-            HTTGenAnalyzer.genMatch(event, tau, event.gentauleps, event.genleps, [], dR=0.2, matchAll=True)
             self.trigMatching(event, tau)
 
         #import pdb ; pdb.set_trace()
@@ -78,10 +81,27 @@ class TauAnalyzer( Analyzer ):
         return isPV
 
     def testTau(self, tau):
-        passed  = tau.tauID('byVLooseIsolationMVArun2v1DBoldDMwLT') > 0.5 # pass VLoose WP
-        passed *= tau.tauID('decayModeFindingNewDMs') > 0.5               # pass new DM
-        passed *= abs(tau.eta()) < 2.3 and tau.pt() > 80.                 # kinematics
-        passed *= self.testTauVertex(tau)                                 # take the tau from PV
+        ptcut  = 20.
+        etacut = 2.3
+        skipDM = False
+        isocut = -999
+        
+        if hasattr(self.cfg_ana, 'ptcut'):
+            ptcut = self.cfg_ana.ptcut
+
+        if hasattr(self.cfg_ana, 'etacut'):
+            etacut = self.cfg_ana.etacut
+
+        if hasattr(self.cfg_ana, 'skipDM'):
+            idcut = self.cfg_ana.skipDM
+
+        if hasattr(self.cfg_ana, 'isocut'):
+            isocut = self.cfg_ana.isocut
+    
+        passed  = tau.tauID('byVLooseIsolationMVArun2v1DBoldDMwLT') > isocut # pass VLoose WP
+        passed *= (skipDM or (tau.tauID('decayModeFindingNewDMs') > 0) )     # pass new DM
+        passed *= abs(tau.eta()) < etacut and tau.pt() > ptcut               # kinematics
+        passed *= self.testTauVertex(tau)                                    # take the tau from PV
         return passed
     
     def trigMatching(self, event, tau, ptMin=0., etaMax=9999.):

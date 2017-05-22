@@ -1,7 +1,8 @@
 import ROOT
 
-from itertools import combinations
-from copy      import deepcopy
+from copy        import deepcopy
+from itertools   import combinations, product
+from collections import OrderedDict
 
 from PhysicsTools.Heppy.analyzers.core.Analyzer import Analyzer
 from PhysicsTools.Heppy.analyzers.core.AutoHandle import AutoHandle
@@ -15,15 +16,34 @@ class TauTauRateAnalyzer(Analyzer):
         super(TauTauRateAnalyzer, self).declareHandles()
         self.handles['taus'] = AutoHandle('slimmedTaus', 'std::vector<pat::Tau>')
 
+        self.handles['triggerresults'] = AutoHandle(
+            ('TriggerResults', '', 'TEST'),
+            'edm::TriggerResults'
+        )
+        
+        self.handles['triggerevent'  ] = AutoHandle(
+            ('hltTriggerSummaryAOD', '', 'TEST'),
+            'trigger::TriggerEvent'
+        )
+
     def process(self, event):
         super(TauTauRateAnalyzer, self).process(event)
-        # Take the pre-sorted vertices from miniAOD
-        event.goodVertices = event.vertices
+        
+        try:
+            # Take the pre-sorted vertices from miniAOD
+            event.goodVertices = event.vertices
+        except:
+            # pass if, for example, you're running on RAW only
+            pass
 
         alltaus = []
 
         for discr in self.cfg_ana.discriminators:
-            taus = getattr(event, discr)
+            
+            try:
+                taus = getattr(event, discr)
+            except:
+                continue
             
             for ii in taus:
                 tt = PhysicsObject(ii.tau)
@@ -37,7 +57,21 @@ class TauTauRateAnalyzer(Analyzer):
                     alltaus.append(tt)
 
         alltaus.sort(key=lambda x: x.pt(), reverse=True)
-                
+        
+        if hasattr(self.cfg_ana, 'ptcut'):
+            alltaus = [tt for tt in alltaus if tt.pt()>self.cfg_ana.ptcut]
+
+        filtersToMatch = self.readTriggerObject()
+        for k, v in filtersToMatch.iteritems():
+            for tau, to in product(alltaus, v):
+                if deltaR(tau, to) < 0.05 and abs(to.pt() - tau.pt())<0.05:
+                    setattr(tau, k, True)
+        
+        event.trigger_taus = alltaus
+
+        if not self.cfg_ana.addOfflineTaus:
+            return True
+                    
         recotaus = self.handles['taus'].product()
         
         for tt in alltaus:
@@ -46,11 +80,39 @@ class TauTauRateAnalyzer(Analyzer):
                 dR = deltaR(tt, rt)
                 if dR < dRmax:
                      tt.recotau = rt
-                     dRmax = dR      
+                     dRmax = dR
         
-        if hasattr(self.cfg_ana, 'ptcut'):
-            alltaus = [tt for tt in alltaus if tt.pt()>self.cfg_ana.ptcut]
-        
-        event.trigger_taus = alltaus
-
         return True
+
+    def readTriggerObject(self):
+        triggerResults = self.handles['triggerresults'].product()
+        triggerEvent   = self.handles['triggerevent'  ].product()
+        
+        nFilters = triggerEvent.sizeFilters()
+        
+        if hasattr(self.cfg_ana, 'filtersToMatch'):
+            filtersToMatch = OrderedDict()
+            for ff in self.cfg_ana.filtersToMatch:
+                filtersToMatch[ff] = []
+
+        for iFilter in range(nFilters):
+            filterTag      = triggerEvent.filterTag(iFilter).encode().split(':')[0]
+            if filterTag not in filtersToMatch.keys():
+                continue
+            objectKeys     = triggerEvent.filterKeys(iFilter)
+            triggerObjects = triggerEvent.getObjects()
+
+            for iKey in range(objectKeys.size()):
+                objKey     = objectKeys.at(iKey)
+                triggerObj = triggerObjects[objKey]
+
+                triggerObjCMG = PhysicsObject(triggerObj)
+                triggerObjCMG.filterName = filterTag
+                
+                filtersToMatch[filterTag].append(triggerObjCMG)
+        
+        return filtersToMatch
+        
+        
+        
+        
