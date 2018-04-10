@@ -126,7 +126,7 @@ class JetAnalyzer(Analyzer):
         allJets = [Jet(jet) for jet in miniaodjets]
 
         if self.recalibrateJets:
-            self.jetReCalibrator.correctAll(allJets, event.rho, delta=0., 
+            self.jetReCalibrator.correctAll(allJets, event.rho, delta=0., metShift=[0.,0.],
                                                 addCorr=True, addShifts=True)
 
         for jet in allJets:

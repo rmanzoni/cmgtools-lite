@@ -1,4 +1,4 @@
-from itertools import combinations
+from itertools import combinations, product
 
 from PhysicsTools.Heppy.analyzers.core.Analyzer import Analyzer
 from PhysicsTools.Heppy.analyzers.core.AutoHandle import AutoHandle
@@ -79,7 +79,7 @@ class TriggerAnalyzer(Analyzer):
         if hasattr(self.cfg_ana, 'extraTrigObj'):
             self.extraTriggerObjects = self.cfg_ana.extraTrigObj
 
-        self.vetoTriggerList = None
+        self.vetoTriggerList = []
 
         if hasattr(self.cfg_comp, 'vetoTriggers'):
             self.vetoTriggerList = self.cfg_comp.vetoTriggers
@@ -87,10 +87,13 @@ class TriggerAnalyzer(Analyzer):
         self.counters.addCounter('Trigger')
         self.counters.counter('Trigger').register('All events')
         self.counters.counter('Trigger').register('HLT')
-
-        for trigger in self.triggerList:
+                
+        for trigger in set(['_'.join(trig.split('_')[:-1]) for trig in self.triggerList]):
             self.counters.counter('Trigger').register(trigger)
-            self.counters.counter('Trigger').register(trigger + 'prescaled')
+        for trigger in set(['_'.join(trig.split('_')[:-1]) for trig in self.triggerList]):
+            self.counters.counter('Trigger').register(trigger + ' prescaled')
+        for trigger in set(['_'.join(trig.split('_')[:-1]) for trig in self.vetoTriggerList]):
+            self.counters.counter('Trigger').register('failed veto ' + trigger)
 
     def removeDuplicates(self, trigger_infos):
         # RIC: remove duplicated trigger objects 
@@ -116,6 +119,8 @@ class TriggerAnalyzer(Analyzer):
 
         triggerBits = self.handles['triggerResultsHLT'].product()
         names = event.input.object().triggerNames(triggerBits)
+        
+        event.triggerResults = triggerBits
 
         preScales = self.handles['triggerPrescales'].product()
 
@@ -130,6 +135,7 @@ class TriggerAnalyzer(Analyzer):
         triggers_fired = []
         
         for trigger_name in self.triggerList + self.extraTrig:
+            trigger_name_no_version = '_'.join(trigger_name.split('_')[:-1])
             index = names.triggerIndex(trigger_name)
             if index == len(triggerBits):
                 continue
@@ -144,11 +150,11 @@ class TriggerAnalyzer(Analyzer):
             if fired and (prescale == 1 or self.cfg_ana.usePrescaled):
                 if trigger_name in self.triggerList:
                     trigger_passed = True
-                    self.counters.counter('Trigger').inc(trigger_name)            
+                    self.counters.counter('Trigger').inc(trigger_name_no_version)            
                 triggers_fired.append(trigger_name)
             elif fired:
                 print 'WARNING: Trigger not passing because of prescale', trigger_name
-                self.counters.counter('Trigger').inc(trigger_name + 'prescaled')
+                self.counters.counter('Trigger').inc(trigger_name_no_version + ' prescaled')
 
         # JAN: I don't understand why the following is needed - there is a 
         # unique loop above
@@ -158,10 +164,13 @@ class TriggerAnalyzer(Analyzer):
         if self.cfg_ana.requireTrigger:
             if not trigger_passed:
                 return False
-        
+                
         if self.cfg_ana.addTriggerObjects:
             triggerObjects = self.handles['triggerObjects'].product()
             for to in triggerObjects:
+                # unpack filter labels if needed (in 2017 it is)
+                if getattr(self.cfg_ana, 'unpackLabels', False):
+                    to.unpackFilterLabels(event.input.events.object(), triggerBits)
                 to.unpackPathNames(names)
                 for info in trigger_infos:
                     if to.hasPathName(info.name):
@@ -176,11 +185,15 @@ class TriggerAnalyzer(Analyzer):
                             info.object_names.append('')
                         info.objects.append(to)
                         info.objIds.add(abs(to.pdgId()))
-        
-
-                                                
+                         
         event.trigger_infos = trigger_infos
-
+        
+        for itrig, iveto in product(event.trigger_infos, self.vetoTriggerList):
+            if iveto == itrig.name and itrig.fired:
+                trigger_name_no_version = '_'.join(itrig.name.split('_')[:-1])
+                self.counters.counter('Trigger').inc('failed veto' + trigger_name_no_version)
+                return False
+        
         if self.cfg_ana.verbose:
             print 'run %d, lumi %d,event %d' %(event.run, event.lumi, event.eventId) , 'Triggers_fired: ', triggers_fired  
         if hasattr(self.cfg_ana, 'saveFlag'):
